@@ -64,6 +64,7 @@
     body[data-scene="ending-respectable"]{ background-color: #c0d8c8; --scene-header: #90c0a0; }
     body[data-scene="ending-character"]  { background-color: #d8c8e8; --scene-header: #c0a8e0; }
     body[data-scene="ending-civics"]     { background-color: #ccd0d8; --scene-header: #a8b4c0; }
+    body[data-scene="ending-mob-takeover"] { background-color: #1a0a2a; --scene-header: #3a1a5a; color: #e8d8f8; }
 
     /* scene-tinted choice left-tab + hover */
     body[data-scene="hoa"]   .choice-btn { border-left-color: #3b6acc; }
@@ -502,16 +503,25 @@ const WEATHER = {
    GAME STATE
 ═══════════════════════════════════════════════════════════════ */
 let gs; // gameState — reset on new game
+let _cachedEventBody = ''; // prevents double-call of eventHTML side effects
 
 function freshState() {
   return {
     currentDay: 1,
     phase: 'intro',
     flags: {
+      // HOA
       hoaCompliant: false, hoaHostile: false, hoaBribed: false, hoaShutDown: false,
-      hoaVouchedNeighbors: false,
-      mobRefused: false, mobFront: false, mobPending: false,
+      hoaVouchedNeighbors: false, hoaEnhancedThreat: false,
+      // Mob
+      mobRefused: false, mobRefusedTwice: false, mobFront: false, mobPending: false,
+      mobHandledHOA: false, tookBuyout: false,
+      // Bullies
       bulliesGone: false, bulliesTolerated: false, bulliesAllied: false,
+      bulliesScaredByMob: false,
+      // Cross-branch
+      mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
+      // Community
       seniorNetwork: false, dogWalkerReg: false, secretRecipe: false,
     },
     day: newDaySlate(),
@@ -627,10 +637,16 @@ const DAYS = [
     eventTag: 'tag-mob', eventTagLabel: '🕴️ Suspicious Visitor',
     eventHTML(s) {
       const bonuses = [];
-      if (s.flags.seniorNetwork) bonuses.push('Mrs. Chen\'s bridge club stops by in force');
+      if (s.flags.seniorNetwork) bonuses.push("Mrs. Chen's bridge club stops by in force");
       if (s.flags.dogWalkerReg)  bonuses.push('the regular dog walkers are back with friends');
       const bonusLine = bonuses.length
         ? `<p class="narrative" style="color:var(--green);font-weight:600">✓ ${bonuses.join(' and ')}.</p>` : '';
+      // If HOA is already causing trouble, Sal references it — sweetening his pitch
+      const hoaAngle = (s.flags.hoaHostile || s.flags.hoaBribed)
+        ? `<p class="narrative">He glances up the street toward where Pemberton's car was parked this morning.
+           "Word is you've had some trouble with the HOA." He waves it off.
+           "We have an understanding with Pemberton. Join us — that problem disappears."</p>`
+        : '';
       return `
         ${bonusLine}
         <p class="narrative">
@@ -638,11 +654,12 @@ const DAYS = [
           Then a man in an expensive suit strolls up. He doesn't look thirsty.
         </p>
         <p class="narrative">
-          "<strong>Big Sal</strong>," he says, sliding a business card across the table.
+          "<strong>Big Sal</strong>," he says, sliding a business card face-down across the table.
           "I run a few… enterprises in this neighborhood. Your little setup here —
           I like it. I can send a lot of customers your way." He pauses.
           "In return, thirty cents on every dollar. Think of it as a partnership."
         </p>
+        ${hoaAngle}
         <p class="narrative">
           His smile doesn't quite reach his eyes.
         </p>`;
@@ -651,20 +668,24 @@ const DAYS = [
       {
         label: "Decline politely — \"Thanks, but no thanks\"",
         hint: "He nods slowly. A little too slowly.",
-        cost: 'Day 6: sign vandalized (-$10 repair)',
         effect(s) { s.flags.mobRefused = true; }
       },
       {
         label: "Accept the deal — become a front",
         hint: "Customers start appearing out of nowhere. The math gets complicated.",
-        bonus: '+40% customers Days 4–7',
-        cost: '-30% profit split Days 4–7',
-        effect(s) { s.flags.mobFront = true; }
+        effect(s) {
+          s.flags.mobFront = true;
+          // Sal quietly "handles" HOA as part of the deal if it was already hostile
+          if (s.flags.hoaHostile || s.flags.hoaBribed) {
+            s.flags.mobHandledHOA = true;
+            s.flags.hoaHostile = false;
+            s.flags.hoaBribed = false;
+          }
+        }
       },
       {
         label: "Play dumb — \"I'm just a kid selling lemonade!\"",
         hint: "He laughs. But you notice him speak to someone on his phone as he walks away.",
-        cost: 'Day 6: his observer returns with the same offer',
         effect(s) { s.flags.mobPending = true; }
       },
     ],
@@ -720,27 +741,76 @@ const DAYS = [
     // eventHTML is dynamic — see renderEvent
     eventHTML(s) {
       const hoaLines = [];
-      if (s.flags.hoaHostile) hoaLines.push(`
-        <p class="narrative" style="color:var(--red);font-weight:600">
-          ⚠️ A certified letter is taped to your stand: <em>"Notice of Non-Compliance — Neighborhood Vendor Permit Required.
-          Comply within one hour or cease operations."</em> — Pemberton, HOA Board.
+
+      // Mob silently handled HOA — Pemberton is conspicuously gone
+      if (s.flags.mobHandledHOA) {
+        hoaLines.push(`<p class="narrative" style="color:var(--muted)">
+          Pemberton is conspicuously absent today. You're not sure what Big Sal said to him,
+          but the HOA clipboard hasn't appeared on Maple Street since your conversation with Sal.
+          You decide not to think about it too hard.
         </p>`);
-      if (s.flags.hoaBribed) hoaLines.push(`
-        <p class="narrative" style="color:var(--red);font-weight:600">
-          ⚠️ Pemberton is back. He's not smiling now. "I gave you a pass.
-          Now I need twenty dollars or I'm filing a formal complaint with the city."
-        </p>`);
+      } else {
+        if (s.flags.hoaHostile) hoaLines.push(`
+          <p class="narrative" style="color:var(--red);font-weight:600">
+            ⚠️ A certified letter is taped to your stand: "Notice of Non-Compliance —
+            Neighborhood Vendor Permit Required. Comply within one hour or cease operations."
+            — Pemberton, HOA Board.
+          </p>`);
+        if (s.flags.hoaBribed) hoaLines.push(`
+          <p class="narrative" style="color:var(--red);font-weight:600">
+            ⚠️ Pemberton is back. He's not smiling now. "I gave you a pass.
+            Now I need twenty dollars or I'm filing a formal complaint with the city."
+          </p>`);
+      }
+
+      // Mrs. Chen shows up if senior network — she has HOA history
+      const chenLine = s.flags.seniorNetwork && (s.flags.hoaHostile || s.flags.hoaBribed)
+        ? `<p class="narrative" style="color:var(--green);font-weight:600">
+            Mrs. Chen appears at your elbow before you can even read the letter.
+            "I was on this HOA board for eleven years," she says, eyes hard.
+            "I know where every skeleton is buried. Pemberton knows it too."
+            She parks herself in the fold-up chair beside your stand and doesn't move.
+          </p>`
+        : '';
+
+      // Mob front: Marco recognizes Big Sal's operation and backs off
+      if (s.flags.mobFront) {
+        s.flags.bulliesScaredByMob = true;
+        return `
+          ${hoaLines.join('')}
+          ${chenLine}
+          <p class="narrative">
+            Marco and his crew round the corner — then one of them grabs Marco's sleeve and
+            points at the business card sitting on your table. Big Sal's card.
+          </p>
+          <p class="narrative">
+            Marco's whole expression changes. "We're good," he says, already backing away,
+            hands raised. "We're real good here. No trouble." His crew is halfway down the
+            block before he finishes the sentence.
+          </p>`;
+      }
+
+      // Mob refused: Sal sent word you're unprotected — Marco is emboldened
+      const marcoLine = s.flags.mobRefused
+        ? `<p class="narrative">
+            Marco smiles wider than usual. "Heard you turned down a good offer the other day."
+            He leans on the table. "That wasn't very smart." He helps himself to four cups.
+            His crew takes more. Nobody pays.
+          </p>`
+        : `<p class="narrative">
+            Marco shrugs at you. "Consider it a fee. For operating in our neighborhood."
+            His friends laugh.
+          </p>`;
+
       return `
         ${hoaLines.join('')}
+        ${chenLine}
         <p class="narrative">
-          The rain has kept the crowds thin. Then <strong>Marco</strong> rolls up with three friends,
-          hands in pockets, scanning the street. One of them leans over and helps himself to a cup.
-          Nobody reaches for money.
+          The rain has kept the crowds thin. Then <strong>Marco</strong> rolls up with three
+          friends, hands in pockets, scanning the street. One of them leans over and helps
+          himself to a cup. Nobody reaches for money.
         </p>
-        <p class="narrative">
-          Marco shrugs at you. "Consider it a fee. For operating in our neighborhood."
-          His friends laugh.
-        </p>`;
+        ${marcoLine}`;
     },
     // HOA sub-event handled in renderEvent before bully choices
     hasHoaSubEvent: true,
@@ -753,9 +823,12 @@ const DAYS = [
       },
       {
         label: "Let it slide — absorb the loss",
-        hint: "You say nothing. They take 8 cups and move on. Business continues.",
-        cost: '-8 cups of revenue',
-        effect(s) { s.day.customerMult *= 0.80; s.flags.bulliesTolerated = true; } // approx -8 cups via mult
+        hint: "You say nothing. They take what they want and move on.",
+        // mob refused = Marco takes more since he knows you have no protection
+        effect(s) {
+          s.day.customerMult *= s.flags.mobRefused ? 0.72 : 0.80;
+          s.flags.bulliesTolerated = true;
+        }
       },
       {
         label: "Hire Marco's crew as security",
@@ -806,29 +879,58 @@ const DAYS = [
       if (s.flags.mobRefused) {
         s.day.extraCost += 10; s.day.extraCostLabel = 'Sign repair';
         lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">
-          ⚠️ You arrive to find your sign in pieces. Someone worked it over with a boot overnight.
-          The repair materials cost $10.
+          ⚠️ You arrive to find your sign in pieces on the sidewalk.
+          Someone worked it over with a boot last night. A note is tucked under the debris:
+          <em>"Last warning. — S"</em>
+          Repairs cost $10.
         </p>`);
+        // Mob harassment actively costs customers today
+        s.day.customerMult *= 0.85;
       }
       if (s.flags.mobPending) {
         lines.push(`<p class="narrative">
-          A man in a grey jacket is already waiting by your stand.
-          He slides a napkin across the table — it says <em>"Big Sal's offer still stands."</em>
+          A man in a grey jacket is already waiting when you arrive.
+          He slides a napkin across the table. It reads: <em>"Big Sal's offer still stands.
+          This is the last time he asks nicely."</em>
         </p>`);
       }
       if (s.flags.mobFront) {
-        lines.push(`<p class="narrative">
-          Big Sal stops by mid-morning. He counts the cups, nods approvingly.
-          "You're doing well, kid. I'm thinking… we make this permanent.
-          We'll talk tomorrow." He winks and walks off.
+        // Cross-branch: Sal offers to fix HOA situation
+        const hoaOffer = s.flags.hoaHostile
+          ? `<p class="narrative">"Still got that HOA business?" He shakes his head like it's nothing.
+             "One phone call. Pemberton won't bother you again." He says it the way someone
+             says they'll take out the trash.</p>`
+          : '';
+        // Cross-branch: Mrs. Chen warns you about Sal
+        const chenWarning = s.flags.seniorNetwork
+          ? `<p class="narrative" style="color:var(--muted)">
+              Mrs. Chen pulls you aside before you open the table. "I've seen that man in the suit
+              coming by." She squeezes your hand. "Promise me you know what you're doing, dear."
+             </p>`
+          : '';
+        lines.push(`${chenWarning}
+          <p class="narrative">
+            Big Sal stops by mid-morning. He counts the cups, nods slowly.
+            "You're doing well, kid. Real well." He straightens his jacket.
+            "I'm thinking we make this permanent. We'll settle the details tomorrow."
+            He winks and walks off without looking back.
+          </p>${hoaOffer}`);
+      }
+      // Cross-branch: standing up to Marco + secret recipe = reputation boom
+      if (s.flags.bulliesGone && s.flags.secretRecipe) {
+        lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
+          ✓ Word has spread: you stood your ground with Marco's crew AND you make the
+          best lemonade anyone around here has tasted. People are coming from three
+          streets over just to see what the fuss is about.
         </p>`);
+        s.day.customerMult *= 1.12;
       }
       if (!lines.length) {
         lines.push(`<p class="narrative">
-          A quiet, warm morning on Maple Street. Your reputation precedes you now —
-          a few people stop to say they've heard about the stand.
+          A quiet morning on Maple Street. Your reputation precedes you now —
+          a few people stop to say they've heard good things about the stand.
         </p>`);
-        s.day.customerMult *= 1.10; // community rep bonus
+        s.day.customerMult *= 1.10;
       }
       return lines.join('');
     },
@@ -838,33 +940,35 @@ const DAYS = [
       {
         label: 'Pack up early — cut losses',
         hint: 'Leave by noon. Less revenue, but no wasted ingredients.',
-        cost: '-50% customers',
         effect(s) { s.day.customerMult *= 0.50; }
       },
       {
         label: 'Stay and run a "Deal of the Day" (price -$0.25)',
         hint: 'Reduced price brings people in despite the conditions.',
-        cost: 'Price drops to $0.75',
         effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.10; }
       },
       {
         label: 'Move to the covered bus shelter ($2)',
-        hint: "The shelter owner lets you set up inside for $2. Bad weather can't stop you.",
-        cost: '-$2.00 shelter fee',
-        bonus: '+25% customer recovery',
+        hint: "Set up inside the bus shelter. Bad weather and bad people can't reach you.",
         effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Shelter fee'; s.day.customerMult *= 1.25; }
       },
     ],
     mobPendingChoices: [
       {
         label: "Accept Big Sal's deal",
-        hint: "+40% customers — but 30% of every dollar goes to him from here on.",
-        effect(s) { s.flags.mobFront = true; s.flags.mobPending = false; }
+        hint: "Customers start appearing out of nowhere. The math gets complicated.",
+        effect(s) {
+          s.flags.mobFront = true; s.flags.mobPending = false;
+          if (s.flags.hoaHostile || s.flags.hoaBribed) {
+            s.flags.mobHandledHOA = true;
+            s.flags.hoaHostile = false; s.flags.hoaBribed = false;
+          }
+        }
       },
       {
         label: "Refuse again — for good",
-        hint: "\"Tell Sal I'm not interested.\" The man shrugs and leaves.",
-        effect(s) { s.flags.mobRefused = true; s.flags.mobPending = false; }
+        hint: "\"Tell Sal I'm not interested.\" The man shrugs and leaves. But he doesn't look surprised.",
+        effect(s) { s.flags.mobRefusedTwice = true; s.flags.mobRefused = true; s.flags.mobPending = false; }
       },
     ],
   },
@@ -875,6 +979,47 @@ const DAYS = [
     eventTag: 'tag-quiet', eventTagLabel: '🏁 Last Day',
     eventHTML(s) {
       const lines = [];
+
+      // Mob refused twice — they show up to shut you down. This triggers game-over path.
+      if (s.flags.mobRefusedTwice) {
+        s.flags.mobShowdown = true;
+        lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">
+          ⚠️ Three men you've never seen before set up across the street before you even
+          arrive. They don't say anything. They just stand there, staring, and every time
+          a customer approaches your stand, one of them shakes his head slowly.
+          Customers keep walking.
+        </p>
+        <p class="narrative">
+          By nine AM Big Sal appears. He doesn't look angry. That's somehow worse.
+          "Last chance, kid. You join us, pay us, or go home. Those are the options."
+        </p>`);
+        s.day.customerMult *= 0.30; // mob harassment kills business
+        return lines.join('');
+      }
+
+      // Mob bought out — their connections intimidate Pemberton into disappearing
+      if (s.flags.tookBuyout && s.flags.hoaHostile) {
+        lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
+          ✓ Pemberton isn't here. Word got to him somehow about your recent business
+          arrangements. He called to say the HOA is "reviewing the matter." You won't
+          see him again.
+        </p>`);
+        s.flags.hoaHostile = false; s.flags.hoaCompliant = true;
+      }
+
+      // Mob + bullies both present — standoff
+      if (s.flags.mobFront && s.flags.bulliesAllied) {
+        s.flags.mobBullyStandoff = true;
+        lines.push(`<p class="narrative">
+          Big Sal and Marco arrive within minutes of each other and immediately
+          clock the situation. Big Sal looks Marco up and down. "Didn't know the
+          kid was running with you." Marco doesn't blink. "Didn't know he was running
+          with <em>you</em>." The whole street seems to hold its breath.
+          They both turn and look at you.
+        </p>`);
+      }
+
+      // Community rally — HOA + secret recipe
       if (s.flags.hoaCompliant && s.flags.secretRecipe) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
           ✓ Mr. Pemberton stops by — not with a clipboard, but with a smile.
@@ -882,31 +1027,60 @@ const DAYS = [
         </p>`);
         s.day.customerMult *= 1.15;
       }
+
+      // Mrs. Chen avoids the stand if mob is still active
+      if (s.flags.seniorNetwork && s.flags.mobFront && !s.flags.tookBuyout) {
+        lines.push(`<p class="narrative">
+          Mrs. Chen waves from across the street but doesn't cross.
+          She's seen Big Sal's visits too many times now. She mouths "I'm sorry"
+          and turns away. Some of the bridge club follows her lead.
+        </p>`);
+        s.day.customerMult *= 0.90;
+      }
+
+      // HOA hostile + bullies allied — Pemberton weaponises Marco's presence
+      if (s.flags.hoaHostile && s.flags.bulliesAllied && !s.flags.hoaCompliant) {
+        s.flags.hoaEnhancedThreat = true;
+      }
+
       if (s.flags.bulliesAllied) {
-        lines.push(`<p class="narrative">
-          Marco and the crew show up at 8am sharp. "Last day, right? We want in."
-          They hold out their hands — they want a cut of today's sales.
-        </p>`);
+        const marcoText = s.flags.mobBullyStandoff
+          ? `Marco glances at Big Sal, then back at you. "You've got a complicated life, kid."
+             He grins slowly. "We still want in — but given the company, the price just went up."`
+          : `Marco and the crew show up at 8am sharp. "Last day, right? We want in."
+             They hold out their hands — they want a cut of today's sales.`;
+        lines.push(`<p class="narrative">${marcoText}</p>`);
       }
+
       if (s.flags.mobFront) {
-        lines.push(`<p class="narrative">
-          Big Sal arrives with a briefcase. "Kid, I'll buy you out right now.
-          Take $30 cash, sign the stand over to me, and we're done."
-          He taps the briefcase. "Or you can keep running it my way. Up to you."
-        </p>`);
+        const salText = s.flags.mobBullyStandoff
+          ? `Big Sal watches Marco's crew and turns to you. "You've got an interesting operation.
+             Let's simplify it." He sets the briefcase down. "$30. You walk away clean, Marco
+             walks away, I walk away." A long pause. "Or this gets complicated."`
+          : `Big Sal arrives with a briefcase. "Kid, I'll buy you out right now.
+             Take $30 cash, sign the stand over to me, and we're done."
+             He taps the briefcase. "Or you keep running it my way. Up to you."`;
+        lines.push(`<p class="narrative">${salText}</p>`);
       }
-      if (s.flags.hoaHostile && !s.flags.hoaVouchedNeighbors) {
-        lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">
-          ⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15 permit fee
-          or we shut this down right now."
-        </p>`);
+
+      if (s.flags.hoaHostile && !s.flags.hoaCompliant) {
+        const pembertonText = s.flags.hoaEnhancedThreat
+          ? `⚠️ Pemberton arrives with a city inspector and points at Marco's crew.
+             "Criminal loitering. This stand is a public nuisance and a safety hazard."
+             He turns to you. "Pay the $15 permit fee right now, or I file a report
+             with the city and the police."`
+          : `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
+             permit fee or we shut this down right now."`;
+        lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
       }
+
       if (!lines.length) {
         lines.push(`<p class="narrative">
           The whole summer has come down to this. Maple Street is buzzing.
           People you've never seen before stop to check out the stand.
         </p>`);
       }
+
       lines.push(`<p class="narrative">
         Grandma is watching from the porch. She gives you a small nod.
         Whatever happens today, she's already proud.
@@ -1130,6 +1304,17 @@ const ENDINGS = {
            You're going to be really, really prepared for next summer.
            And you're already writing a letter to the city council.`,
   },
+  mobTakeover: {
+    emoji: '🕴️', title: 'Taken Out',
+    sub: "The mob closed your stand.",
+    body: `Big Sal didn't yell. He didn't have to. He just nodded to the three men across the street
+           and they walked over, picked up your table, and folded it into the back of a van.
+           One of them handed you back your pitcher — empty.
+           "Nothing personal, kid," Sal said. "Business."
+           You went home and counted the coins in your jar. Not enough.
+           Grandma made lemonade for you instead. It tasted better than any you'd made all summer.
+           Next year, you'll know better than to make the same people your enemy twice.`,
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1286,7 +1471,8 @@ function renderEvent() {
   setScene(sceneForDay(gs.currentDay));
   const cfg = DAYS[gs.currentDay - 1];
   const cardClass = cfg.quiet ? 'card quiet-day' : 'card';
-  const eventBody = typeof cfg.eventHTML === 'function' ? cfg.eventHTML(gs) : cfg.eventHTML;
+  _cachedEventBody = typeof cfg.eventHTML === 'function' ? cfg.eventHTML(gs) : cfg.eventHTML;
+  const eventBody = _cachedEventBody;
 
   // HOA sub-event on Day 5
   if (cfg.hasHoaSubEvent && (gs.flags.hoaHostile || gs.flags.hoaBribed) && !gs.day.hoaEventResolved) {
@@ -1351,7 +1537,19 @@ function renderEvent() {
 function renderDay7Sub2() {
   const cfg = DAYS[6]; // Day 7
   const cardClass = 'card';
-  const eventBody = typeof cfg.eventHTML === 'function' ? cfg.eventHTML(gs) : cfg.eventHTML;
+  const eventBody = _cachedEventBody;
+
+  // Mob refused twice — ultimatum before anything else
+  if (gs.flags.mobShowdown) {
+    setScene('mob');
+    setStage(`
+      <div class="${cardClass} event-card">
+        <span class="event-tag tag-mob">🕴️ The Reckoning</span>
+        ${eventBody}
+      </div>`);
+    setTimeout(() => renderMobShowdown(), 2200);
+    return;
+  }
 
   if (cfg.hasMobBuyout && gs.flags.mobFront) {
     setStage(`
@@ -1373,7 +1571,7 @@ function renderDay7Sub2() {
 function renderDay7Sub3() {
   const cfg = DAYS[6];
   const cardClass = 'card';
-  const eventBody = typeof cfg.eventHTML === 'function' ? cfg.eventHTML(gs) : cfg.eventHTML;
+  const eventBody = _cachedEventBody;
 
   if (cfg.hasBulliesAlliedCut && gs.flags.bulliesAllied) {
     setStage(`
@@ -1396,10 +1594,28 @@ function renderDay7Sub3() {
 function renderBulliesChoice() {
   const cfg = DAYS[4]; // Day 5
   const cardClass = 'card';
+
+  // Mob scared Marco off — no confrontation needed
+  if (gs.flags.bulliesScaredByMob) {
+    gs.flags.bulliesGone = true;
+    setStage(`
+      <div class="${cardClass} event-card">
+        <span class="event-tag tag-bully">😤 Trouble Brewing</span>
+        <p class="narrative">
+          Marco and his crew are gone before you could even decide what to do.
+          Big Sal's name apparently carries serious weight on this block.
+          You file that information away.
+        </p>
+        <button class="btn-primary" id="btn-bully-skip">Keep Selling →</button>
+      </div>`);
+    document.getElementById('btn-bully-skip').addEventListener('click', () => renderSimulation());
+    return;
+  }
+
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag tag-bully">😤 Trouble Brewing</span>
-      <p class="narrative">Back to the main problem: Marco and his crew are still helping themselves to your cups.</p>
+      <p class="narrative">Marco and his crew are still here. What do you do?</p>
       <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
     </div>`);
   attachChoiceBtns(cfg.choices, (choice) => {
@@ -1527,6 +1743,88 @@ function renderShutdown() {
       <h2>Civics Lesson</h2>
       <p class="end-sub">HOA: 1 — You: 0</p>
       <p class="end-body">${ENDINGS.civics.body}</p>
+      <div class="final-stats">
+        <div class="stat-box"><div class="s-val">${gs.currentDay}</div><div class="s-lbl">Days Survived</div></div>
+        <div class="stat-box"><div class="s-val">${fmt(gs.totals.netProfit)}</div><div class="s-lbl">Total Profit</div></div>
+      </div>
+      <button class="btn-primary" id="btn-replay">Play Again</button>
+    </div>`);
+  document.getElementById('pnl-panel').classList.remove('hidden');
+  btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
+}
+
+/* ── MOB TAKEOVER (early ending) ────────────────────────────── */
+function renderMobShowdown() {
+  setScene('mob');
+  const choices = [
+    {
+      id: 'mob-join',
+      label: "Fine. You win.",
+      hint: "\"Okay, Sal. Whatever you want.\" You look at your feet.",
+      effect(s) {
+        s.flags.mobFront = true;
+        s.day.profitSplit = 0.50; // Day 7 only, but Sal takes half
+        s.day.customerMult *= 1.0; // mob harassment lifts
+        // Restore some customers since harassment is lifted
+        s.day.customerMult = Math.max(s.day.customerMult, 0.70);
+      }
+    },
+    {
+      id: 'mob-tribute',
+      label: "I'll pay you. Just leave me alone today.",
+      hint: "You reach into your money jar. $30. It hurts.",
+      effect(s) {
+        s.day.extraCost += 30; s.day.extraCostLabel = 'Mob tribute payment';
+        s.day.customerMult *= 1.0;
+        // Mob backs off — normal day resumes, harassment ends
+        s.day.customerMult = Math.max(s.day.customerMult, 0.80);
+      }
+    },
+    {
+      id: 'mob-refuse',
+      label: "No. I won't.",
+      hint: "You look Sal in the eye. \"My stand. My rules.\"",
+      effect(s) { s.flags.mobTakenOut = true; }
+    },
+  ];
+
+  setStage(`
+    <div class="card event-card" style="border:2px solid #6644cc">
+      <span class="event-tag tag-mob">🕴️ Big Sal's Ultimatum</span>
+      <p class="narrative" style="font-weight:700">
+        Big Sal stands in front of you, blocking the sun. Behind him, the three men
+        wait with their arms crossed. Every customer who walks by gets the look.
+        They keep walking.
+      </p>
+      <p class="narrative">
+        "Join us. Pay us. Or go home." He holds up one finger for each option.
+        "You've already used up your chances, kid. This is the last conversation."
+      </p>
+      <hr class="sep">
+      <p style="font-weight:700;margin-bottom:.5rem;">Your answer:</p>
+      <div class="choices">${renderChoiceButtons(choices)}</div>
+    </div>`);
+
+  attachChoiceBtns(choices, (choice) => {
+    choice.effect(gs);
+    if (gs.flags.mobTakenOut) {
+      setTimeout(() => renderMobTakeover(), 400);
+    } else {
+      setTimeout(() => renderDay7Sub3(), 400);
+    }
+  });
+}
+
+function renderMobTakeover() {
+  setScene('ending-mob-takeover');
+  gs.flags.mobTakenOut = true;
+  updateHud();
+  setStage(`
+    <div class="card ending-card" style="background:#2a0a3a;color:#e8d8f8;border:2px solid #6644cc">
+      <span class="big-emoji">🕴️</span>
+      <h2 style="color:#e8d8f8">${ENDINGS.mobTakeover.title}</h2>
+      <p class="end-sub" style="color:#c0a8e0">${ENDINGS.mobTakeover.sub}</p>
+      <p class="end-body" style="color:#d8c8f0">${ENDINGS.mobTakeover.body}</p>
       <div class="final-stats">
         <div class="stat-box"><div class="s-val">${gs.currentDay}</div><div class="s-lbl">Days Survived</div></div>
         <div class="stat-box"><div class="s-val">${fmt(gs.totals.netProfit)}</div><div class="s-lbl">Total Profit</div></div>

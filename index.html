@@ -451,6 +451,16 @@
 
     .mt1 { margin-top: 1rem; }
     .sep  { margin: 1rem 0; border: none; border-top: 1px dashed var(--border); }
+
+    /* ── Good-will mood lines (invisible meter, tone-only feedback) ──── */
+    .gw-mood {
+      font-style: italic;
+      color: var(--muted);
+      font-size: .93em;
+      border-left: 3px solid var(--border);
+      padding-left: .75rem;
+      margin: .5rem 0 .75rem;
+    }
   </style>
 </head>
 <body>
@@ -527,6 +537,14 @@ function freshState() {
     day: newDaySlate(),
     ledger: [],
     totals: { revenue: 0, ingredientCost: 0, extraCost: 0, mobCut: 0, netProfit: 0 },
+    // Invisible good-will meter — high = character likes the player, low = cold/hostile
+    goodWill: {
+      pemberton: 50,
+      bigSal:    50,
+      marco:     50,
+      mrsChen:   65,
+      mrOkafor:  65,
+    },
   };
 }
 
@@ -543,6 +561,64 @@ function newDaySlate() {
     cappedDemand: false,
     hoaEventResolved: false,
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GOOD WILL HELPERS
+   Invisible relationship meter (0–100) per character.
+   High = character is warm toward the player.
+   Low  = character is cold / guarded / threatening.
+   The meter never surfaces as UI — only as tone in dialogue.
+═══════════════════════════════════════════════════════════════ */
+function adjustGW(s, adj) {
+  for (const [char, delta] of Object.entries(adj)) {
+    if (s.goodWill[char] !== undefined) {
+      s.goodWill[char] = Math.max(0, Math.min(100, s.goodWill[char] + delta));
+    }
+  }
+}
+
+// Returns 'warm' (>70) | 'neutral' (40–70) | 'cool' (20–40) | 'hostile' (<20)
+function gwTone(s, char) {
+  const v = s.goodWill[char] ?? 50;
+  if (v > 70) return 'warm';
+  if (v > 40) return 'neutral';
+  if (v > 20) return 'cool';
+  return 'hostile';
+}
+
+// Returns a short italicised mood beat for a character, or '' if neutral.
+function gwMood(s, char) {
+  const tone = gwTone(s, char);
+  if (tone === 'neutral') return '';
+  const MOODS = {
+    pemberton: {
+      warm:    `<p class="narrative gw-mood">Pemberton's clipboard is tucked under his arm — almost relaxed. He gives you a nod that's closer to neighbourly than official.</p>`,
+      cool:    `<p class="narrative gw-mood">Pemberton approaches with his clipboard already raised. Whatever goodwill existed between you has clearly curdled into something more official.</p>`,
+      hostile: `<p class="narrative gw-mood">Pemberton is already writing something down before he's within earshot. His expression says the pleasantries are over.</p>`,
+    },
+    bigSal: {
+      warm:    `<p class="narrative gw-mood">Big Sal carries himself the way he does when he's decided someone is worth his patience — unhurried, almost cordial.</p>`,
+      cool:    `<p class="narrative gw-mood">Something in Big Sal's posture has shifted. The pleasantries feel thinner than before.</p>`,
+      hostile: `<p class="narrative gw-mood">Big Sal's patience has a bottom, and you get the sense you're near it. The smile is still there — but it's load-bearing now.</p>`,
+    },
+    marco: {
+      warm:    `<p class="narrative gw-mood">Marco rolls up without the usual performance — almost like he's checking in on a partner rather than running his usual routine.</p>`,
+      cool:    `<p class="narrative gw-mood">Marco's body language broadcasts intent before he even opens his mouth. He's already decided this is going to go his way.</p>`,
+      hostile: `<p class="narrative gw-mood">Marco doesn't bother with pretense today. The look he gives you on the way up says everything about how little he thinks of your chances.</p>`,
+    },
+    mrsChen: {
+      warm:    `<p class="narrative gw-mood">Mrs. Chen's whole face opens up when she sees you — the kind of smile that means she's been telling people about you.</p>`,
+      cool:    `<p class="narrative gw-mood">Mrs. Chen hesitates a beat before coming over. She smiles, but it's the careful kind — the smile of someone who's decided to reserve judgment.</p>`,
+      hostile: `<p class="narrative gw-mood">Mrs. Chen keeps her distance today. She gives you a look that isn't unkind, exactly — but she doesn't close the gap between you either.</p>`,
+    },
+    mrOkafor: {
+      warm:    `<p class="narrative gw-mood">Mr. Okafor approaches with purpose — the walk of someone who has something to offer and is pleased to offer it.</p>`,
+      cool:    `<p class="narrative gw-mood">Mr. Okafor pauses longer than usual before approaching, as if he's still weighing something up.</p>`,
+      hostile: `<p class="narrative gw-mood">Mr. Okafor glances your way, then seems to think twice. When he finally comes over, there's a politeness to it that keeps you at arm's length.</p>`,
+    },
+  };
+  return MOODS[char]?.[tone] ?? '';
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -569,13 +645,13 @@ const DAYS = [
         label: 'Pay the $8 Vendor Permit',
         hint: "Official and above board. Pemberton can't touch you.",
         cost: '-$8.00 permit fee',
-        effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA permit'; s.flags.hoaCompliant = true; }
+        effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA permit'; s.flags.hoaCompliant = true; adjustGW(s, { pemberton: 25, bigSal: -5, marco: -5 }); }
       },
       {
         label: "Refuse — \"I'm just a kid!\"",
         hint: "Save $8, but Pemberton writes your address in his clipboard…",
         cost: 'Save $8 now; trouble Day 5',
-        effect(s) { s.flags.hoaHostile = true; }
+        effect(s) { s.flags.hoaHostile = true; adjustGW(s, { pemberton: -30, bigSal: 5, marco: 15 }); }
       },
       {
         label: 'Offer free samples to charm him',
@@ -585,6 +661,7 @@ const DAYS = [
           // cost approx 12 cups of revenue
           s.day.customerMult *= 0.85; // selling fewer effective cups
           s.flags.hoaBribed = true;
+          adjustGW(s, { pemberton: 10, mrsChen: -10, bigSal: -5 });
         }
       },
     ],
@@ -594,18 +671,29 @@ const DAYS = [
   {
     dayNum: 2, title: 'The Regulars', weather: 'cloudy', quiet: true,
     eventTag: 'tag-quiet', eventTagLabel: '🌿 Quiet Day',
-    eventHTML: `
-      <p class="narrative">
-        No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
-        with silver hair and flour on her apron shuffles up to the stand.
-        "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
-        Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
-      </p>
-      <p class="narrative">
-        Before you can answer, a golden retriever bounds up and nearly knocks the whole table over.
-        Its owner, a young guy with three leashes tangled around his arm, apologizes breathlessly.
-        Behind him: four more dog walkers, all looking sweaty and thirsty.
-      </p>`,
+    eventHTML(s) {
+      // Pemberton's handling on Day 1 has already spread through the neighbourhood grapevine
+      const pembertonRep = s.flags.hoaCompliant
+        ? `<p class="narrative gw-mood">Word travels fast on Maple Street. A couple of neighbours you've never spoken to give you an approving nod — seems paying the permit made an impression.</p>`
+        : s.flags.hoaHostile
+          ? `<p class="narrative gw-mood">There's a slightly wary energy around the stand today. Someone clearly noticed your run-in with Pemberton yesterday.</p>`
+          : '';
+      return `
+        ${pembertonRep}
+        <p class="narrative">
+          No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
+          with silver hair and flour on her apron shuffles up to the stand.
+        </p>
+        <p class="narrative">
+          ${gwMood(s, 'mrsChen')}"<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
+          Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
+        </p>
+        <p class="narrative">
+          Before you can answer, a golden retriever bounds up and nearly knocks the whole table over.
+          Its owner, a young guy with three leashes tangled around his arm, apologizes breathlessly.
+          Behind him: four more dog walkers, all looking sweaty and thirsty.
+        </p>`;
+    },
     choices: [
       {
         label: 'Pour Mrs. Chen a free cup and chat',
@@ -614,6 +702,7 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 0.97; // lose ~1 cup worth
           s.flags.seniorNetwork = true;
+          adjustGW(s, { mrsChen: 20, mrOkafor: 10, bigSal: -5 });
         }
       },
       {
@@ -621,7 +710,7 @@ const DAYS = [
         hint: "A dollar for a bowl. The dog walkers are instantly loyal.",
         cost: '-$1.00 (bowl)',
         bonus: '+8% customers Days 3–4',
-        effect(s) { s.day.extraCost += 1; s.day.extraCostLabel = 'Dog bowl'; s.flags.dogWalkerReg = true; }
+        effect(s) { s.day.extraCost += 1; s.day.extraCostLabel = 'Dog bowl'; s.flags.dogWalkerReg = true; adjustGW(s, { mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: 'Keep things professional — just sell',
@@ -654,7 +743,7 @@ const DAYS = [
           Then a man in an expensive suit strolls up. He doesn't look thirsty.
         </p>
         <p class="narrative">
-          "<strong>Big Sal</strong>," he says, sliding a business card face-down across the table.
+          ${gwMood(s, 'bigSal')}"<strong>Big Sal</strong>," he says, sliding a business card face-down across the table.
           "I run a few… enterprises in this neighborhood. Your little setup here —
           I like it. I can send a lot of customers your way." He pauses.
           "In return, thirty cents on every dollar. Think of it as a partnership."
@@ -668,7 +757,7 @@ const DAYS = [
       {
         label: "Decline politely — \"Thanks, but no thanks\"",
         hint: "He nods slowly. A little too slowly.",
-        effect(s) { s.flags.mobRefused = true; }
+        effect(s) { s.flags.mobRefused = true; adjustGW(s, { bigSal: -15, pemberton: 5, mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: "Accept the deal — become a front",
@@ -681,12 +770,13 @@ const DAYS = [
             s.flags.hoaHostile = false;
             s.flags.hoaBribed = false;
           }
+          adjustGW(s, { bigSal: 30, mrsChen: -25, mrOkafor: -20, pemberton: -10 });
         }
       },
       {
         label: "Play dumb — \"I'm just a kid selling lemonade!\"",
         hint: "He laughs. But you notice him speak to someone on his phone as he walks away.",
-        effect(s) { s.flags.mobPending = true; }
+        effect(s) { s.flags.mobPending = true; adjustGW(s, { bigSal: -5, mrsChen: 5 }); }
       },
     ],
   },
@@ -707,7 +797,7 @@ const DAYS = [
           studying your setup with the kind of attention usually reserved for fine art.
         </p>
         <p class="narrative">
-          "<strong>Mr. Okafor</strong>," he says. "Thirty years at a restaurant downtown.
+          ${gwMood(s, 'mrOkafor')}"<strong>Mr. Okafor</strong>," he says. "Thirty years at a restaurant downtown.
           Retired now." He sips your lemonade. A long pause.
           "The ratio… it's almost right. May I?" He gestures toward your pitcher.
         </p>`;
@@ -718,13 +808,13 @@ const DAYS = [
         hint: "He tweaks the sugar and adds a pinch of salt. People stop mid-step when they smell it.",
         cost: '-$2.00 (better ingredients)',
         bonus: '+15% customers Days 5–7 (secret recipe rep)',
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Recipe upgrade'; s.flags.secretRecipe = true; }
+        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Recipe upgrade'; s.flags.secretRecipe = true; adjustGW(s, { mrOkafor: 25, mrsChen: 10, pemberton: 5 }); }
       },
       {
         label: "Run a \"Bring Your Dog\" promo",
         hint: "Free water for dogs, lemonade for their owners. Pandemonium. Profitable pandemonium.",
         bonus: '+10% customers today',
-        effect(s) { s.day.customerMult *= 1.10; }
+        effect(s) { s.day.customerMult *= 1.10; adjustGW(s, { mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: "Keep the setup simple today",
@@ -806,7 +896,7 @@ const DAYS = [
         ${hoaLines.join('')}
         ${chenLine}
         <p class="narrative">
-          The rain has kept the crowds thin. Then <strong>Marco</strong> rolls up with three
+          ${gwMood(s, 'marco')}The rain has kept the crowds thin. Then <strong>Marco</strong> rolls up with three
           friends, hands in pockets, scanning the street. One of them leans over and helps
           himself to a cup. Nobody reaches for money.
         </p>
@@ -819,7 +909,7 @@ const DAYS = [
         label: "Confront Marco directly",
         hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
         cost: '-15% customers today',
-        effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; }
+        effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; adjustGW(s, { marco: -25, mrsChen: 15, mrOkafor: 5, pemberton: 10 }); }
       },
       {
         label: "Let it slide — absorb the loss",
@@ -828,6 +918,7 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= s.flags.mobRefused ? 0.72 : 0.80;
           s.flags.bulliesTolerated = true;
+          adjustGW(s, { marco: 20, mrsChen: -15, mrOkafor: -10 });
         }
       },
       {
@@ -839,6 +930,7 @@ const DAYS = [
           s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew';
           s.day.customerMult *= 1.10;
           s.flags.bulliesAllied = true;
+          adjustGW(s, { marco: 25, mrsChen: -20, mrOkafor: -15, pemberton: -15 });
         }
       },
     ],
@@ -847,13 +939,13 @@ const DAYS = [
         label: "Pay the fine ($15) and comply",
         hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
         cost: '-$15.00 fine',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
+        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; adjustGW(s, { pemberton: 25, bigSal: -5 }); }
       },
       {
         label: "Fight it — call his bluff",
         hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
         cost: '-50% customers today (distracted)',
-        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
+        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; adjustGW(s, { pemberton: -20, mrsChen: 10 }); } // HOA lingers to Day 7
       },
       {
         label: "Ask neighbors to vouch for you",
@@ -864,6 +956,7 @@ const DAYS = [
           if (hasSupport) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
           else { s.flags.hoaVouchedNeighbors = true; } // 50/50 resolved Day 7
           s.day.hoaEventResolved = true;
+          adjustGW(s, { mrsChen: 15, mrOkafor: 15, pemberton: -5 });
         }
       },
     ],
@@ -910,7 +1003,7 @@ const DAYS = [
           : '';
         lines.push(`${chenWarning}
           <p class="narrative">
-            Big Sal stops by mid-morning. He counts the cups, nods slowly.
+            ${gwMood(s, 'bigSal')}Big Sal stops by mid-morning. He counts the cups, nods slowly.
             "You're doing well, kid. Real well." He straightens his jacket.
             "I'm thinking we make this permanent. We'll settle the details tomorrow."
             He winks and walks off without looking back.
@@ -963,12 +1056,13 @@ const DAYS = [
             s.flags.mobHandledHOA = true;
             s.flags.hoaHostile = false; s.flags.hoaBribed = false;
           }
+          adjustGW(s, { bigSal: 25, mrsChen: -25, mrOkafor: -20 });
         }
       },
       {
         label: "Refuse again — for good",
         hint: "\"Tell Sal I'm not interested.\" The man shrugs and leaves. But he doesn't look surprised.",
-        effect(s) { s.flags.mobRefusedTwice = true; s.flags.mobRefused = true; s.flags.mobPending = false; }
+        effect(s) { s.flags.mobRefusedTwice = true; s.flags.mobRefused = true; s.flags.mobPending = false; adjustGW(s, { bigSal: -35, mrsChen: 15, mrOkafor: 15, pemberton: 10 }); }
       },
     ],
   },
@@ -1049,7 +1143,7 @@ const DAYS = [
              He grins slowly. "We still want in — but given the company, the price just went up."`
           : `Marco and the crew show up at 8am sharp. "Last day, right? We want in."
              They hold out their hands — they want a cut of today's sales.`;
-        lines.push(`<p class="narrative">${marcoText}</p>`);
+        lines.push(`${gwMood(s, 'marco')}<p class="narrative">${marcoText}</p>`);
       }
 
       if (s.flags.mobFront) {
@@ -1060,7 +1154,7 @@ const DAYS = [
           : `Big Sal arrives with a briefcase. "Kid, I'll buy you out right now.
              Take $30 cash, sign the stand over to me, and we're done."
              He taps the briefcase. "Or you keep running it my way. Up to you."`;
-        lines.push(`<p class="narrative">${salText}</p>`);
+        lines.push(`${gwMood(s, 'bigSal')}<p class="narrative">${salText}</p>`);
       }
 
       if (s.flags.hoaHostile && !s.flags.hoaCompliant) {
@@ -1071,7 +1165,7 @@ const DAYS = [
              with the city and the police."`
           : `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
              permit fee or we shut this down right now."`;
-        lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
+        lines.push(`${gwMood(s, 'pemberton')}<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
       }
 
       if (!lines.length) {
@@ -1110,6 +1204,7 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 1.30;
           s.day.charityMode = true; // handled in simulateSales
+          adjustGW(s, { mrsChen: 15, mrOkafor: 10, bigSal: -5, pemberton: 10 });
         }
       },
       {
@@ -1123,12 +1218,12 @@ const DAYS = [
       {
         label: 'Pay the $15 permit and be done with it',
         cost: '-$15.00',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA permit (late)'; s.flags.hoaCompliant = true; }
+        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA permit (late)'; s.flags.hoaCompliant = true; adjustGW(s, { pemberton: 20 }); }
       },
       {
         label: 'Refuse — take the shutdown',
         hint: 'Stand gets closed. Game ends early.',
-        effect(s) { s.flags.hoaShutDown = true; }
+        effect(s) { s.flags.hoaShutDown = true; adjustGW(s, { pemberton: -25 }); }
       },
     ],
     bulliesCutChoices: [
@@ -1136,7 +1231,7 @@ const DAYS = [
         label: "Give Marco's crew 15% of today",
         hint: 'They hustle hard. Worth every penny.',
         bonus: '+20% customers',
-        effect(s) { s.day.profitSplit += 0.15; s.day.customerMult *= 1.20; }
+        effect(s) { s.day.profitSplit += 0.15; s.day.customerMult *= 1.20; adjustGW(s, { marco: 20 }); }
       },
       {
         label: "Tell them today you're going solo",
@@ -1154,12 +1249,13 @@ const DAYS = [
           s.flags.mobFront = false;
           s.day.profitSplit = 0;
           s.flags.tookBuyout = true;
+          adjustGW(s, { bigSal: 10, mrsChen: 15 });
         }
       },
       {
         label: "Refuse — run it your way to the end",
         hint: "Big Sal nods slowly. The 30% split stays for the day.",
-        effect(s) { /* mobFront split stays */ }
+        effect(s) { adjustGW(s, { bigSal: -10 }); /* mobFront split stays */ }
       },
     ],
   },

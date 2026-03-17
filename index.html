@@ -33,6 +33,43 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      transition: background-color .7s ease;
+    }
+
+    /* ── Scene backgrounds ─────────────────────────────────────────────── */
+    /* intro / default */
+    body[data-scene="intro"]          { background: #fffbea; }
+    /* weather */
+    body[data-scene="weather-sunny"]  { background: #fffde7; }
+    body[data-scene="weather-hot"]    { background: #fff3e0; }
+    body[data-scene="weather-rainy"]  { background: #e3f0fb; }
+    body[data-scene="weather-cloudy"] { background: #f3f4f6; }
+    /* antagonist events */
+    body[data-scene="hoa"]    { background: #dbeafe; --scene-header: #bfdbfe; --scene-accent: #3b82f6; --scene-hover-bg: #eff6ff; --scene-hover-border: #3b82f6; }
+    body[data-scene="mob"]    { background: #ede9fe; --scene-header: #ddd6fe; --scene-accent: #7c3aed; --scene-hover-bg: #f5f3ff; --scene-hover-border: #7c3aed; }
+    body[data-scene="bully"]  { background: #ffedd5; --scene-header: #fed7aa; --scene-accent: #ea580c; --scene-hover-bg: #fff7ed; --scene-hover-border: #ea580c; }
+    /* quiet community days */
+    body[data-scene="quiet"]  { background: #fef9ec; --scene-header: #fde68a; --scene-accent: #d97706; --scene-hover-bg: #fffbeb; --scene-hover-border: #d97706; }
+    /* selling animation */
+    body[data-scene="sim"]    { background: #dcfce7; --scene-header: #bbf7d0; }
+    /* P&L review */
+    body[data-scene="pnl"]    { background: #f0f9ff; --scene-header: #bae6fd; }
+    /* endings */
+    body[data-scene="ending-mogul"]      { background: #fffde7; --scene-header: #fde047; }
+    body[data-scene="ending-dirty"]      { background: #f5f0ff; --scene-header: #ddd6fe; }
+    body[data-scene="ending-aboveboard"] { background: #eff6ff; --scene-header: #bfdbfe; }
+    body[data-scene="ending-crew"]       { background: #ffedd5; --scene-header: #fed7aa; }
+    body[data-scene="ending-respectable"]{ background: #f0fdf4; --scene-header: #bbf7d0; }
+    body[data-scene="ending-character"]  { background: #fdf4ff; --scene-header: #e9d5ff; }
+    body[data-scene="ending-civics"]     { background: #f1f5f9; --scene-header: #cbd5e1; }
+
+    /* scene-tinted choice hovers */
+    body[data-scene="hoa"]   .choice-btn:hover,
+    body[data-scene="mob"]   .choice-btn:hover,
+    body[data-scene="bully"] .choice-btn:hover,
+    body[data-scene="quiet"] .choice-btn:hover {
+      border-color: var(--scene-hover-border, var(--yellow));
+      background:   var(--scene-hover-bg,    var(--yellow-lt));
     }
 
     /* ── App shell ─────────────────────────────────────────────────────── */
@@ -57,7 +94,8 @@
     /* ── Header / HUD ──────────────────────────────────────────────────── */
     #game-header {
       grid-area: header;
-      background: var(--yellow);
+      background: var(--scene-header, var(--yellow));
+      transition: background .7s ease;
       border-radius: var(--radius);
       padding: .75rem 1.25rem;
       display: flex;
@@ -172,22 +210,22 @@
     .narrative strong { color: var(--text); }
 
     /* ── Choices ───────────────────────────────────────────────────────── */
-    .choices { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
+    .choices { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.25rem; }
     .choice-btn {
-      display: flex; flex-direction: column; gap: 2px;
-      width: 100%; text-align: left; padding: .75rem 1rem;
+      display: flex; flex-direction: column; gap: 4px;
+      width: 100%; text-align: left; padding: 1.25rem 1.5rem;
       border: 2px solid var(--border); border-radius: var(--radius);
       background: var(--bg); cursor: pointer;
-      transition: border-color .15s, background .15s, transform .1s;
+      transition: border-color .15s, background .15s, transform .12s;
       font-family: inherit;
     }
-    .choice-btn:hover  { border-color: var(--yellow); background: var(--yellow-lt); transform: translateX(4px); }
+    .choice-btn:hover  { border-color: var(--yellow); background: var(--yellow-lt); transform: translateX(6px); }
     .choice-btn:active { background: var(--yellow); }
     .choice-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-    .choice-btn .c-label { font-weight: 700; font-size: .95rem; }
-    .choice-btn .c-hint  { font-size: .8rem; color: var(--muted); }
-    .choice-btn .c-cost  { font-size: .8rem; font-weight: 700; color: var(--red); }
-    .choice-btn .c-bonus { font-size: .8rem; font-weight: 700; color: var(--green); }
+    .choice-btn .c-label { font-weight: 800; font-size: 1.1rem; }
+    .choice-btn .c-hint  { font-size: .88rem; color: var(--muted); }
+    .choice-btn .c-cost  { font-size: .88rem; font-weight: 700; color: var(--red); }
+    .choice-btn .c-bonus { font-size: .88rem; font-weight: 700; color: var(--green); }
 
     /* ── Simulation ────────────────────────────────────────────────────── */
     .sim-card { text-align: center; }
@@ -230,19 +268,21 @@
 
     /* ── Buttons ───────────────────────────────────────────────────────── */
     .btn-primary {
-      display: inline-block; padding: .65rem 1.75rem;
+      display: inline-block; padding: 1.1rem 2.75rem;
       background: var(--yellow); color: var(--text);
-      font-weight: 800; font-size: 1rem; border: none;
+      font-weight: 900; font-size: 1.15rem; border: none;
       border-radius: var(--radius); cursor: pointer;
-      transition: background .15s, transform .1s;
+      transition: background .15s, transform .1s, box-shadow .15s;
       font-family: inherit;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      letter-spacing: .01em;
     }
-    .btn-primary:hover  { background: var(--yellow-dk); color: #fff; }
-    .btn-primary:active { transform: scale(.97); }
+    .btn-primary:hover  { background: var(--yellow-dk); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    .btn-primary:active { transform: scale(.97) translateY(0); }
     .btn-secondary {
-      display: inline-block; padding: .55rem 1.25rem;
+      display: inline-block; padding: .85rem 1.75rem;
       background: transparent; color: var(--text);
-      font-weight: 700; font-size: .9rem;
+      font-weight: 700; font-size: 1rem;
       border: 2px solid var(--border); border-radius: var(--radius);
       cursor: pointer; transition: border-color .15s;
       font-family: inherit; margin-left: .5rem;
@@ -1030,6 +1070,7 @@ function attachChoiceBtns(choices, onPick) {
 
 /* ── INTRO ───────────────────────────────────────────────────── */
 function renderIntro() {
+  setScene('intro');
   setStage(`
     <div class="card intro-card">
       <span class="big-emoji">🍋</span>
@@ -1057,6 +1098,8 @@ function renderWeather() {
   gs.day = newDaySlate();
   gs.day.weather = weatherKey;
 
+  setScene('weather-' + weatherKey);
+
   // Apply mob front split on appropriate days
   if (gs.flags.mobFront && gs.currentDay >= 4) applyMobFrontSplit(gs);
 
@@ -1082,6 +1125,7 @@ function renderWeather() {
 
 /* ── EVENT ───────────────────────────────────────────────────── */
 function renderEvent() {
+  setScene(sceneForDay(gs.currentDay));
   const cfg = DAYS[gs.currentDay - 1];
   const cardClass = cfg.quiet ? 'card quiet-day' : 'card';
   const eventBody = typeof cfg.eventHTML === 'function' ? cfg.eventHTML(gs) : cfg.eventHTML;
@@ -1238,6 +1282,7 @@ function renderDayChoices() {
 
 /* ── SIMULATION ──────────────────────────────────────────────── */
 function renderSimulation() {
+  setScene('sim');
   // Apply mob front split before simulation
   if (gs.flags.mobFront && !gs.flags.tookBuyout && gs.currentDay >= 4) {
     gs.day.profitSplit = Math.max(gs.day.profitSplit, 0.30);
@@ -1276,6 +1321,7 @@ function renderSimulation() {
 
 /* ── P&L RESULT ──────────────────────────────────────────────── */
 function renderPnL(result) {
+  setScene('pnl');
   updateHud();
   const isLast = gs.currentDay === 7;
   const profitClass = result.netProfit >= 0 ? 'pos' : 'neg';
@@ -1314,6 +1360,7 @@ function renderPnL(result) {
 
 /* ── SHUTDOWN (early ending) ─────────────────────────────────── */
 function renderShutdown() {
+  setScene('ending-civics');
   gs.flags.hoaShutDown = true;
   updateHud();
   setStage(`
@@ -1335,6 +1382,7 @@ function renderShutdown() {
 /* ── ENDING ──────────────────────────────────────────────────── */
 function renderEnding() {
   const key = getEndingKey(gs);
+  setScene('ending-' + key);
   const end = ENDINGS[key];
   updateHud();
 
@@ -1371,6 +1419,23 @@ function renderEnding() {
   document.getElementById('pnl-panel').classList.remove('hidden');
   btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
   btn('btn-review', () => { document.getElementById('pnl-panel').scrollIntoView({ behavior: 'smooth' }); });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCENE MANAGER
+═══════════════════════════════════════════════════════════════ */
+function setScene(name) {
+  document.body.dataset.scene = name;
+}
+
+function sceneForDay(dayNum) {
+  if (!dayNum || dayNum < 1) return 'intro';
+  const cfg = DAYS[dayNum - 1];
+  if (cfg.quiet) return 'quiet';
+  if (cfg.eventTag === 'tag-hoa') return 'hoa';
+  if (cfg.eventTag === 'tag-mob') return 'mob';
+  if (cfg.eventTag === 'tag-bully') return 'bully';
+  return 'intro';
 }
 
 /* ═══════════════════════════════════════════════════════════════

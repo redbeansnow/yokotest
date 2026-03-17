@@ -60,7 +60,6 @@
     body[data-scene="ending-mogul"]      { background-color: #f0e8c0; --scene-header: #e8cc40; }
     body[data-scene="ending-dirty"]      { background-color: #ccc0e0; --scene-header: #baaee0; }
     body[data-scene="ending-aboveboard"] { background-color: #c8d8ee; --scene-header: #a8c4e8; }
-    body[data-scene="ending-crew"]       { background-color: #e8d4b0; --scene-header: #e0c080; }
     body[data-scene="ending-respectable"]{ background-color: #c0d8c8; --scene-header: #90c0a0; }
     body[data-scene="ending-character"]  { background-color: #d8c8e8; --scene-header: #c0a8e0; }
     body[data-scene="ending-civics"]     { background-color: #ccd0d8; --scene-header: #a8b4c0; }
@@ -451,6 +450,16 @@
 
     .mt1 { margin-top: 1rem; }
     .sep  { margin: 1rem 0; border: none; border-top: 1px dashed var(--border); }
+
+    /* ── Good-will mood lines (invisible meter, tone-only feedback) ──── */
+    .gw-mood {
+      font-style: italic;
+      color: var(--muted);
+      font-size: .93em;
+      border-left: 3px solid var(--border);
+      padding-left: .75rem;
+      margin: .5rem 0 .75rem;
+    }
   </style>
 </head>
 <body>
@@ -512,21 +521,25 @@ function freshState() {
     flags: {
       // HOA
       hoaCompliant: false, hoaHostile: false, hoaBribed: false, hoaShutDown: false,
-      hoaVouchedNeighbors: false, hoaEnhancedThreat: false,
+      hoaVouchedNeighbors: false,
       // Mob
       mobRefused: false, mobRefusedTwice: false, mobFront: false, mobPending: false,
       mobHandledHOA: false, tookBuyout: false,
-      // Bullies
-      bulliesGone: false, bulliesTolerated: false, bulliesAllied: false,
-      bulliesScaredByMob: false,
       // Cross-branch
-      mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
+      mobShowdown: false, mobTakenOut: false,
       // Community
       seniorNetwork: false, dogWalkerReg: false, secretRecipe: false,
     },
     day: newDaySlate(),
     ledger: [],
     totals: { revenue: 0, ingredientCost: 0, extraCost: 0, mobCut: 0, netProfit: 0 },
+    // Invisible good-will meter — high = character likes the player, low = cold/hostile
+    goodWill: {
+      pemberton: 50,
+      bigSal:    50,
+      mrsChen:   65,
+      mrOkafor:  65,
+    },
   };
 }
 
@@ -543,6 +556,59 @@ function newDaySlate() {
     cappedDemand: false,
     hoaEventResolved: false,
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GOOD WILL HELPERS
+   Invisible relationship meter (0–100) per character.
+   High = character is warm toward the player.
+   Low  = character is cold / guarded / threatening.
+   The meter never surfaces as UI — only as tone in dialogue.
+═══════════════════════════════════════════════════════════════ */
+function adjustGW(s, adj) {
+  for (const [char, delta] of Object.entries(adj)) {
+    if (s.goodWill[char] !== undefined) {
+      s.goodWill[char] = Math.max(0, Math.min(100, s.goodWill[char] + delta));
+    }
+  }
+}
+
+// Returns 'warm' (>70) | 'neutral' (40–70) | 'cool' (20–40) | 'hostile' (<20)
+function gwTone(s, char) {
+  const v = s.goodWill[char] ?? 50;
+  if (v > 70) return 'warm';
+  if (v > 40) return 'neutral';
+  if (v > 20) return 'cool';
+  return 'hostile';
+}
+
+// Returns a short italicised mood beat for a character, or '' if neutral.
+function gwMood(s, char) {
+  const tone = gwTone(s, char);
+  if (tone === 'neutral') return '';
+  const MOODS = {
+    pemberton: {
+      warm:    `<p class="narrative gw-mood">Pemberton's clipboard is tucked under his arm — almost relaxed. He gives you a nod that's closer to neighbourly than official.</p>`,
+      cool:    `<p class="narrative gw-mood">Pemberton approaches with his clipboard already raised. Whatever goodwill existed between you has clearly curdled into something more official.</p>`,
+      hostile: `<p class="narrative gw-mood">Pemberton is already writing something down before he's within earshot. His expression says the pleasantries are over.</p>`,
+    },
+    bigSal: {
+      warm:    `<p class="narrative gw-mood">Big Sal carries himself the way he does when he's decided someone is worth his patience — unhurried, almost cordial.</p>`,
+      cool:    `<p class="narrative gw-mood">Something in Big Sal's posture has shifted. The pleasantries feel thinner than before.</p>`,
+      hostile: `<p class="narrative gw-mood">Big Sal's patience has a bottom, and you get the sense you're near it. The smile is still there — but it's load-bearing now.</p>`,
+    },
+    mrsChen: {
+      warm:    `<p class="narrative gw-mood">Mrs. Chen's whole face opens up when she sees you — the kind of smile that means she's been telling people about you.</p>`,
+      cool:    `<p class="narrative gw-mood">Mrs. Chen hesitates a beat before coming over. She smiles, but it's the careful kind — the smile of someone who's decided to reserve judgment.</p>`,
+      hostile: `<p class="narrative gw-mood">Mrs. Chen keeps her distance today. She gives you a look that isn't unkind, exactly — but she doesn't close the gap between you either.</p>`,
+    },
+    mrOkafor: {
+      warm:    `<p class="narrative gw-mood">Mr. Okafor approaches with purpose — the walk of someone who has something to offer and is pleased to offer it.</p>`,
+      cool:    `<p class="narrative gw-mood">Mr. Okafor pauses longer than usual before approaching, as if he's still weighing something up.</p>`,
+      hostile: `<p class="narrative gw-mood">Mr. Okafor glances your way, then seems to think twice. When he finally comes over, there's a politeness to it that keeps you at arm's length.</p>`,
+    },
+  };
+  return MOODS[char]?.[tone] ?? '';
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -569,13 +635,13 @@ const DAYS = [
         label: 'Pay the $8 Vendor Permit',
         hint: "Official and above board. Pemberton can't touch you.",
         cost: '-$8.00 permit fee',
-        effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA permit'; s.flags.hoaCompliant = true; }
+        effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA permit'; s.flags.hoaCompliant = true; adjustGW(s, { pemberton: 25, bigSal: -5 }); }
       },
       {
         label: "Refuse — \"I'm just a kid!\"",
         hint: "Save $8, but Pemberton writes your address in his clipboard…",
         cost: 'Save $8 now; trouble Day 5',
-        effect(s) { s.flags.hoaHostile = true; }
+        effect(s) { s.flags.hoaHostile = true; adjustGW(s, { pemberton: -30, bigSal: 5 }); }
       },
       {
         label: 'Offer free samples to charm him',
@@ -585,6 +651,7 @@ const DAYS = [
           // cost approx 12 cups of revenue
           s.day.customerMult *= 0.85; // selling fewer effective cups
           s.flags.hoaBribed = true;
+          adjustGW(s, { pemberton: 10, mrsChen: -10, bigSal: -5 });
         }
       },
     ],
@@ -594,18 +661,29 @@ const DAYS = [
   {
     dayNum: 2, title: 'The Regulars', weather: 'cloudy', quiet: true,
     eventTag: 'tag-quiet', eventTagLabel: '🌿 Quiet Day',
-    eventHTML: `
-      <p class="narrative">
-        No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
-        with silver hair and flour on her apron shuffles up to the stand.
-        "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
-        Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
-      </p>
-      <p class="narrative">
-        Before you can answer, a golden retriever bounds up and nearly knocks the whole table over.
-        Its owner, a young guy with three leashes tangled around his arm, apologizes breathlessly.
-        Behind him: four more dog walkers, all looking sweaty and thirsty.
-      </p>`,
+    eventHTML(s) {
+      // Pemberton's handling on Day 1 has already spread through the neighbourhood grapevine
+      const pembertonRep = s.flags.hoaCompliant
+        ? `<p class="narrative gw-mood">Word travels fast on Maple Street. A couple of neighbours you've never spoken to give you an approving nod — seems paying the permit made an impression.</p>`
+        : s.flags.hoaHostile
+          ? `<p class="narrative gw-mood">There's a slightly wary energy around the stand today. Someone clearly noticed your run-in with Pemberton yesterday.</p>`
+          : '';
+      return `
+        ${pembertonRep}
+        <p class="narrative">
+          No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
+          with silver hair and flour on her apron shuffles up to the stand.
+        </p>
+        <p class="narrative">
+          ${gwMood(s, 'mrsChen')}"<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
+          Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
+        </p>
+        <p class="narrative">
+          Before you can answer, a golden retriever bounds up and nearly knocks the whole table over.
+          Its owner, a young guy with three leashes tangled around his arm, apologizes breathlessly.
+          Behind him: four more dog walkers, all looking sweaty and thirsty.
+        </p>`;
+    },
     choices: [
       {
         label: 'Pour Mrs. Chen a free cup and chat',
@@ -614,6 +692,7 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 0.97; // lose ~1 cup worth
           s.flags.seniorNetwork = true;
+          adjustGW(s, { mrsChen: 20, mrOkafor: 10, bigSal: -5 });
         }
       },
       {
@@ -621,7 +700,7 @@ const DAYS = [
         hint: "A dollar for a bowl. The dog walkers are instantly loyal.",
         cost: '-$1.00 (bowl)',
         bonus: '+8% customers Days 3–4',
-        effect(s) { s.day.extraCost += 1; s.day.extraCostLabel = 'Dog bowl'; s.flags.dogWalkerReg = true; }
+        effect(s) { s.day.extraCost += 1; s.day.extraCostLabel = 'Dog bowl'; s.flags.dogWalkerReg = true; adjustGW(s, { mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: 'Keep things professional — just sell',
@@ -654,7 +733,7 @@ const DAYS = [
           Then a man in an expensive suit strolls up. He doesn't look thirsty.
         </p>
         <p class="narrative">
-          "<strong>Big Sal</strong>," he says, sliding a business card face-down across the table.
+          ${gwMood(s, 'bigSal')}"<strong>Big Sal</strong>," he says, sliding a business card face-down across the table.
           "I run a few… enterprises in this neighborhood. Your little setup here —
           I like it. I can send a lot of customers your way." He pauses.
           "In return, thirty cents on every dollar. Think of it as a partnership."
@@ -668,7 +747,7 @@ const DAYS = [
       {
         label: "Decline politely — \"Thanks, but no thanks\"",
         hint: "He nods slowly. A little too slowly.",
-        effect(s) { s.flags.mobRefused = true; }
+        effect(s) { s.flags.mobRefused = true; adjustGW(s, { bigSal: -15, pemberton: 5, mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: "Accept the deal — become a front",
@@ -681,12 +760,13 @@ const DAYS = [
             s.flags.hoaHostile = false;
             s.flags.hoaBribed = false;
           }
+          adjustGW(s, { bigSal: 30, mrsChen: -25, mrOkafor: -20, pemberton: -10 });
         }
       },
       {
         label: "Play dumb — \"I'm just a kid selling lemonade!\"",
         hint: "He laughs. But you notice him speak to someone on his phone as he walks away.",
-        effect(s) { s.flags.mobPending = true; }
+        effect(s) { s.flags.mobPending = true; adjustGW(s, { bigSal: -5, mrsChen: 5 }); }
       },
     ],
   },
@@ -707,7 +787,7 @@ const DAYS = [
           studying your setup with the kind of attention usually reserved for fine art.
         </p>
         <p class="narrative">
-          "<strong>Mr. Okafor</strong>," he says. "Thirty years at a restaurant downtown.
+          ${gwMood(s, 'mrOkafor')}"<strong>Mr. Okafor</strong>," he says. "Thirty years at a restaurant downtown.
           Retired now." He sips your lemonade. A long pause.
           "The ratio… it's almost right. May I?" He gestures toward your pitcher.
         </p>`;
@@ -718,13 +798,13 @@ const DAYS = [
         hint: "He tweaks the sugar and adds a pinch of salt. People stop mid-step when they smell it.",
         cost: '-$2.00 (better ingredients)',
         bonus: '+15% customers Days 5–7 (secret recipe rep)',
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Recipe upgrade'; s.flags.secretRecipe = true; }
+        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Recipe upgrade'; s.flags.secretRecipe = true; adjustGW(s, { mrOkafor: 25, mrsChen: 10, pemberton: 5 }); }
       },
       {
         label: "Run a \"Bring Your Dog\" promo",
         hint: "Free water for dogs, lemonade for their owners. Pandemonium. Profitable pandemonium.",
         bonus: '+10% customers today',
-        effect(s) { s.day.customerMult *= 1.10; }
+        effect(s) { s.day.customerMult *= 1.10; adjustGW(s, { mrsChen: 10, mrOkafor: 5 }); }
       },
       {
         label: "Keep the setup simple today",
@@ -734,11 +814,10 @@ const DAYS = [
     ],
   },
 
-  /* ─── DAY 5: The Crew ───────────────────────────────── */
+  /* ─── DAY 5: Halfway There ──────────────────────────── */
   {
-    dayNum: 5, title: 'The Crew', weather: 'rainy', quiet: false,
-    eventTag: 'tag-bully', eventTagLabel: '😤 Trouble Brewing',
-    // eventHTML is dynamic — see renderEvent
+    dayNum: 5, title: 'Halfway There', weather: 'rainy', quiet: false,
+    eventTag: 'tag-hoa', eventTagLabel: '🌧️ Rainy Day',
     eventHTML(s) {
       const hoaLines = [];
 
@@ -766,80 +845,45 @@ const DAYS = [
       // Mrs. Chen shows up if senior network — she has HOA history
       const chenLine = s.flags.seniorNetwork && (s.flags.hoaHostile || s.flags.hoaBribed)
         ? `<p class="narrative" style="color:var(--green);font-weight:600">
-            Mrs. Chen appears at your elbow before you can even read the letter.
+            ${gwMood(s, 'mrsChen')}Mrs. Chen appears at your elbow before you can even read the letter.
             "I was on this HOA board for eleven years," she says, eyes hard.
             "I know where every skeleton is buried. Pemberton knows it too."
             She parks herself in the fold-up chair beside your stand and doesn't move.
           </p>`
         : '';
 
-      // Mob front: Marco recognizes Big Sal's operation and backs off
-      if (s.flags.mobFront) {
-        s.flags.bulliesScaredByMob = true;
-        return `
-          ${hoaLines.join('')}
-          ${chenLine}
-          <p class="narrative">
-            Marco and his crew round the corner — then one of them grabs Marco's sleeve and
-            points at the business card sitting on your table. Big Sal's card.
-          </p>
-          <p class="narrative">
-            Marco's whole expression changes. "We're good," he says, already backing away,
-            hands raised. "We're real good here. No trouble." His crew is halfway down the
-            block before he finishes the sentence.
-          </p>`;
-      }
-
-      // Mob refused: Sal sent word you're unprotected — Marco is emboldened
-      const marcoLine = s.flags.mobRefused
-        ? `<p class="narrative">
-            Marco smiles wider than usual. "Heard you turned down a good offer the other day."
-            He leans on the table. "That wasn't very smart." He helps himself to four cups.
-            His crew takes more. Nobody pays.
-          </p>`
-        : `<p class="narrative">
-            Marco shrugs at you. "Consider it a fee. For operating in our neighborhood."
-            His friends laugh.
-          </p>`;
-
       return `
         ${hoaLines.join('')}
         ${chenLine}
         <p class="narrative">
-          The rain has kept the crowds thin. Then <strong>Marco</strong> rolls up with three
-          friends, hands in pockets, scanning the street. One of them leans over and helps
-          himself to a cup. Nobody reaches for money.
+          Rain since before dawn. The cardboard sign is starting to droop at the corners,
+          and Maple Street is quieter than usual — most people stayed in.
+          The regulars who do show up look grateful for something cold, even on a grey day.
         </p>
-        ${marcoLine}`;
+        <p class="narrative">
+          You're halfway through the week. The stand is holding together.
+          Now it's just a question of how hard you push today.
+        </p>`;
     },
-    // HOA sub-event handled in renderEvent before bully choices
+    // HOA sub-event handled in renderEvent before day choices
     hasHoaSubEvent: true,
     choices: [
       {
-        label: "Confront Marco directly",
-        hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
-        cost: '-15% customers today',
-        effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; }
+        label: "Set up and push through — rain doesn't stop you",
+        hint: "The regulars will come. You just have to be there when they do.",
+        effect(s) { /* baseline — weather mult already applied */ }
       },
       {
-        label: "Let it slide — absorb the loss",
-        hint: "You say nothing. They take what they want and move on.",
-        // mob refused = Marco takes more since he knows you have no protection
-        effect(s) {
-          s.day.customerMult *= s.flags.mobRefused ? 0.72 : 0.80;
-          s.flags.bulliesTolerated = true;
-        }
+        label: "Cut the price to $0.75 — make it up in volume",
+        hint: "Lower the bar and more people will stop, even in this weather.",
+        bonus: '+15% customers',
+        effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.15; }
       },
       {
-        label: "Hire Marco's crew as security",
-        hint: "\"Five bucks. You stand here, nobody messes with the stand.\" He thinks about it. Then grins.",
-        cost: '-$5.00 security fee',
-        bonus: '+10% customers (intimidation factor)',
-        effect(s) {
-          s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew';
-          s.day.customerMult *= 1.10;
-          s.flags.bulliesAllied = true;
-        }
+        label: "Make it a short day — pack up by noon",
+        hint: "Cut losses. Save the ingredients for a better day.",
+        cost: '-50% customers today',
+        effect(s) { s.day.customerMult *= 0.50; }
       },
     ],
     hoaChoices: [
@@ -847,13 +891,13 @@ const DAYS = [
         label: "Pay the fine ($15) and comply",
         hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
         cost: '-$15.00 fine',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
+        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; adjustGW(s, { pemberton: 25, bigSal: -5 }); }
       },
       {
         label: "Fight it — call his bluff",
         hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
         cost: '-50% customers today (distracted)',
-        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
+        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; adjustGW(s, { pemberton: -20, mrsChen: 10 }); } // HOA lingers to Day 7
       },
       {
         label: "Ask neighbors to vouch for you",
@@ -864,6 +908,7 @@ const DAYS = [
           if (hasSupport) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
           else { s.flags.hoaVouchedNeighbors = true; } // 50/50 resolved Day 7
           s.day.hoaEventResolved = true;
+          adjustGW(s, { mrsChen: 15, mrOkafor: 15, pemberton: -5 });
         }
       },
     ],
@@ -910,18 +955,17 @@ const DAYS = [
           : '';
         lines.push(`${chenWarning}
           <p class="narrative">
-            Big Sal stops by mid-morning. He counts the cups, nods slowly.
+            ${gwMood(s, 'bigSal')}Big Sal stops by mid-morning. He counts the cups, nods slowly.
             "You're doing well, kid. Real well." He straightens his jacket.
             "I'm thinking we make this permanent. We'll settle the details tomorrow."
             He winks and walks off without looking back.
           </p>${hoaOffer}`);
       }
-      // Cross-branch: standing up to Marco + secret recipe = reputation boom
-      if (s.flags.bulliesGone && s.flags.secretRecipe) {
+      // Secret recipe reputation carries
+      if (s.flags.secretRecipe) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
-          ✓ Word has spread: you stood your ground with Marco's crew AND you make the
-          best lemonade anyone around here has tasted. People are coming from three
-          streets over just to see what the fuss is about.
+          ✓ Word about the recipe has spread further than you expected.
+          People are coming from three streets over just to see what the fuss is about.
         </p>`);
         s.day.customerMult *= 1.12;
       }
@@ -963,12 +1007,13 @@ const DAYS = [
             s.flags.mobHandledHOA = true;
             s.flags.hoaHostile = false; s.flags.hoaBribed = false;
           }
+          adjustGW(s, { bigSal: 25, mrsChen: -25, mrOkafor: -20 });
         }
       },
       {
         label: "Refuse again — for good",
         hint: "\"Tell Sal I'm not interested.\" The man shrugs and leaves. But he doesn't look surprised.",
-        effect(s) { s.flags.mobRefusedTwice = true; s.flags.mobRefused = true; s.flags.mobPending = false; }
+        effect(s) { s.flags.mobRefusedTwice = true; s.flags.mobRefused = true; s.flags.mobPending = false; adjustGW(s, { bigSal: -35, mrsChen: 15, mrOkafor: 15, pemberton: 10 }); }
       },
     ],
   },
@@ -1007,18 +1052,6 @@ const DAYS = [
         s.flags.hoaHostile = false; s.flags.hoaCompliant = true;
       }
 
-      // Mob + bullies both present — standoff
-      if (s.flags.mobFront && s.flags.bulliesAllied) {
-        s.flags.mobBullyStandoff = true;
-        lines.push(`<p class="narrative">
-          Big Sal and Marco arrive within minutes of each other and immediately
-          clock the situation. Big Sal looks Marco up and down. "Didn't know the
-          kid was running with you." Marco doesn't blink. "Didn't know he was running
-          with <em>you</em>." The whole street seems to hold its breath.
-          They both turn and look at you.
-        </p>`);
-      }
-
       // Community rally — HOA + secret recipe
       if (s.flags.hoaCompliant && s.flags.secretRecipe) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
@@ -1038,40 +1071,17 @@ const DAYS = [
         s.day.customerMult *= 0.90;
       }
 
-      // HOA hostile + bullies allied — Pemberton weaponises Marco's presence
-      if (s.flags.hoaHostile && s.flags.bulliesAllied && !s.flags.hoaCompliant) {
-        s.flags.hoaEnhancedThreat = true;
-      }
-
-      if (s.flags.bulliesAllied) {
-        const marcoText = s.flags.mobBullyStandoff
-          ? `Marco glances at Big Sal, then back at you. "You've got a complicated life, kid."
-             He grins slowly. "We still want in — but given the company, the price just went up."`
-          : `Marco and the crew show up at 8am sharp. "Last day, right? We want in."
-             They hold out their hands — they want a cut of today's sales.`;
-        lines.push(`<p class="narrative">${marcoText}</p>`);
-      }
-
       if (s.flags.mobFront) {
-        const salText = s.flags.mobBullyStandoff
-          ? `Big Sal watches Marco's crew and turns to you. "You've got an interesting operation.
-             Let's simplify it." He sets the briefcase down. "$30. You walk away clean, Marco
-             walks away, I walk away." A long pause. "Or this gets complicated."`
-          : `Big Sal arrives with a briefcase. "Kid, I'll buy you out right now.
-             Take $30 cash, sign the stand over to me, and we're done."
-             He taps the briefcase. "Or you keep running it my way. Up to you."`;
-        lines.push(`<p class="narrative">${salText}</p>`);
+        const salText = `Big Sal arrives with a briefcase. "Kid, I'll buy you out right now.
+           Take $30 cash, sign the stand over to me, and we're done."
+           He taps the briefcase. "Or you keep running it my way. Up to you."`;
+        lines.push(`${gwMood(s, 'bigSal')}<p class="narrative">${salText}</p>`);
       }
 
       if (s.flags.hoaHostile && !s.flags.hoaCompliant) {
-        const pembertonText = s.flags.hoaEnhancedThreat
-          ? `⚠️ Pemberton arrives with a city inspector and points at Marco's crew.
-             "Criminal loitering. This stand is a public nuisance and a safety hazard."
-             He turns to you. "Pay the $15 permit fee right now, or I file a report
-             with the city and the police."`
-          : `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
-             permit fee or we shut this down right now."`;
-        lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
+        const pembertonText = `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
+           permit fee or we shut this down right now."`;
+        lines.push(`${gwMood(s, 'pemberton')}<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
       }
 
       if (!lines.length) {
@@ -1088,7 +1098,6 @@ const DAYS = [
       return lines.join('');
     },
     hasDay7HoaSettle: true,
-    hasBulliesAlliedCut: true,
     hasMobBuyout: true,
     choices: [
       {
@@ -1110,6 +1119,7 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 1.30;
           s.day.charityMode = true; // handled in simulateSales
+          adjustGW(s, { mrsChen: 15, mrOkafor: 10, bigSal: -5, pemberton: 10 });
         }
       },
       {
@@ -1123,25 +1133,12 @@ const DAYS = [
       {
         label: 'Pay the $15 permit and be done with it',
         cost: '-$15.00',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA permit (late)'; s.flags.hoaCompliant = true; }
+        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA permit (late)'; s.flags.hoaCompliant = true; adjustGW(s, { pemberton: 20 }); }
       },
       {
         label: 'Refuse — take the shutdown',
         hint: 'Stand gets closed. Game ends early.',
-        effect(s) { s.flags.hoaShutDown = true; }
-      },
-    ],
-    bulliesCutChoices: [
-      {
-        label: "Give Marco's crew 15% of today",
-        hint: 'They hustle hard. Worth every penny.',
-        bonus: '+20% customers',
-        effect(s) { s.day.profitSplit += 0.15; s.day.customerMult *= 1.20; }
-      },
-      {
-        label: "Tell them today you're going solo",
-        hint: "Marco shrugs. \"Respect.\" They leave.",
-        effect(s) { /* no change */ }
+        effect(s) { s.flags.hoaShutDown = true; adjustGW(s, { pemberton: -25 }); }
       },
     ],
     mobBuyoutChoices: [
@@ -1154,12 +1151,13 @@ const DAYS = [
           s.flags.mobFront = false;
           s.day.profitSplit = 0;
           s.flags.tookBuyout = true;
+          adjustGW(s, { bigSal: 10, mrsChen: 15 });
         }
       },
       {
         label: "Refuse — run it your way to the end",
         hint: "Big Sal nods slowly. The 30% split stays for the day.",
-        effect(s) { /* mobFront split stays */ }
+        effect(s) { adjustGW(s, { bigSal: -10 }); /* mobFront split stays */ }
       },
     ],
   },
@@ -1196,14 +1194,11 @@ function simulateSales(s) {
 
   const bonusIncome = +(s.day.bonusIncome || 0).toFixed(2);
   const grossProfit = revenue + bonusIncome - ingredientCost - extraCost - charityDonation;
-  const mobCut      = s.flags.mobFront && !s.flags.tookBuyout && s.day.profitSplit > 0
+  const mobCut    = s.flags.mobFront && !s.flags.tookBuyout && s.day.profitSplit > 0
     ? +(Math.max(0, grossProfit) * s.day.profitSplit).toFixed(2) : 0;
-  const bulletinCut = s.day.profitSplit > 0 && !s.flags.mobFront
-    ? +(Math.max(0, grossProfit) * s.day.profitSplit).toFixed(2) : 0; // bully cut Day 7
-  const totalSplit  = +(mobCut + bulletinCut).toFixed(2);
-  const netProfit   = +(grossProfit - totalSplit).toFixed(2);
+  const netProfit = +(grossProfit - mobCut).toFixed(2);
 
-  return { customers, revenue, bonusIncome, ingredientCost, extraCost, charityDonation, mobCut, bulletinCut, totalSplit, netProfit };
+  return { customers, revenue, bonusIncome, ingredientCost, extraCost, charityDonation, mobCut, netProfit };
 }
 
 function applyMobFrontSplit(s) {
@@ -1218,7 +1213,7 @@ function pushLedger(s, result) {
     revenue: result.revenue,
     ingredientCost: result.ingredientCost,
     extraCost: result.extraCost + result.charityDonation,
-    mobCut:  result.mobCut + result.bulletinCut,
+    mobCut:  result.mobCut,
     netProfit: result.netProfit,
     extraCostLabel: s.day.extraCostLabel,
     charityDonation: result.charityDonation,
@@ -1243,7 +1238,6 @@ function getEndingKey(s) {
   if (p >= GOAL) {
     if (s.flags.mobFront && !s.flags.tookBuyout) return 'dirty';
     if (s.flags.hoaCompliant && s.flags.secretRecipe) return 'aboveboard';
-    if (s.flags.bulliesAllied) return 'crew';
     return 'mogul';
   }
   if (p >= 20) return 'respectable';
@@ -1273,14 +1267,6 @@ const ENDINGS = {
     body: `The next HOA newsletter has a small article: <em>"Young Entrepreneur Brings Community Together on Maple Street."</em>
            There's a photo of you, Mr. Okafor, and Pemberton — who is, unbelievably, smiling.
            You made the goal. You did it right. You go to the water park with enough left over to buy the all-day pass.`,
-  },
-  crew: {
-    emoji: '👊🍋', title: 'The Crew',
-    sub: "Best stand on the block.",
-    body: `Marco stops by two weeks later, just to check in. "Summer's almost over," he says, leaning on your wagon.
-           "You did alright." Coming from Marco, that's basically a standing ovation.
-           You hit your goal, you built something, and somehow you ended up with a crew.
-           Next summer, you're thinking about expanding to two stands.`,
   },
   respectable: {
     emoji: '📈', title: 'Respectable Summer',
@@ -1487,7 +1473,7 @@ function renderEvent() {
     attachChoiceBtns(cfg.hoaChoices, (choice) => {
       choice.effect(gs);
       if (gs.flags.hoaShutDown) { renderShutdown(); return; }
-      setTimeout(() => renderBulliesChoice(), 400);
+      setTimeout(() => renderDayChoices(), 400);
     });
     return;
   }
@@ -1573,56 +1559,9 @@ function renderDay7Sub3() {
   const cardClass = 'card';
   const eventBody = _cachedEventBody;
 
-  if (cfg.hasBulliesAlliedCut && gs.flags.bulliesAllied) {
-    setStage(`
-      <div class="${cardClass} event-card">
-        <span class="event-tag tag-bully">👊 Marco's Crew</span>
-        ${eventBody}
-        <hr class="sep">
-        <p style="font-weight:700;margin-bottom:.5rem;">Marco and his crew want a cut:</p>
-        <div class="choices">${renderChoiceButtons(cfg.bulliesCutChoices)}</div>
-      </div>`);
-    attachChoiceBtns(cfg.bulliesCutChoices, (choice) => {
-      choice.effect(gs);
-      setTimeout(() => renderDayChoices(), 400);
-    });
-    return;
-  }
   renderDayChoices();
 }
 
-function renderBulliesChoice() {
-  const cfg = DAYS[4]; // Day 5
-  const cardClass = 'card';
-
-  // Mob scared Marco off — no confrontation needed
-  if (gs.flags.bulliesScaredByMob) {
-    gs.flags.bulliesGone = true;
-    setStage(`
-      <div class="${cardClass} event-card">
-        <span class="event-tag tag-bully">😤 Trouble Brewing</span>
-        <p class="narrative">
-          Marco and his crew are gone before you could even decide what to do.
-          Big Sal's name apparently carries serious weight on this block.
-          You file that information away.
-        </p>
-        <button class="btn-primary" id="btn-bully-skip">Keep Selling →</button>
-      </div>`);
-    document.getElementById('btn-bully-skip').addEventListener('click', () => renderSimulation());
-    return;
-  }
-
-  setStage(`
-    <div class="${cardClass} event-card">
-      <span class="event-tag tag-bully">😤 Trouble Brewing</span>
-      <p class="narrative">Marco and his crew are still here. What do you do?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
-    </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
-    choice.effect(gs);
-    setTimeout(() => renderSimulation(), 400);
-  });
-}
 
 function renderMainEventAndChoices(cfg, cardClass, eventBody) {
   setStage(`

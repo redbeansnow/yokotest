@@ -522,7 +522,7 @@ function freshState() {
       // Cross-branch
       mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
       // Community
-      seniorNetwork: false, dogWalkerReg: false,
+      seniorNetwork: false,
     },
     day: newDaySlate(),
     ledger: [],
@@ -602,9 +602,8 @@ const DAYS = [
         Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
       </p>
       <p class="narrative">
-        Before you can answer, a golden retriever bounds up and nearly knocks the whole table over.
-        Its owner, a young guy with three leashes tangled around his arm, apologizes breathlessly.
-        Behind him: four more dog walkers, all looking sweaty and thirsty.
+        Before you can answer, a couple of neighbors drift over, curious about the new stand.
+        One of them has been walking the same block for years and says she'll be back tomorrow.
       </p>`,
     choices: [
       {
@@ -617,11 +616,10 @@ const DAYS = [
         }
       },
       {
-        label: 'Set out a water bowl for the dogs',
-        hint: "A dollar for a bowl. The dog walkers are instantly loyal.",
-        cost: '-$1.00 (bowl)',
-        bonus: '+8% customers Days 3–4',
-        effect(s) { s.day.extraCost += 1; s.day.extraCostLabel = 'Dog bowl'; s.flags.dogWalkerReg = true; }
+        label: 'Chat up the neighbors — make them feel welcome',
+        hint: "You spend a few minutes talking to everyone who stops. Word starts to spread.",
+        bonus: '+5% customers Day 3',
+        effect(s) { s.day.customerMult *= 1.05; }
       },
       {
         label: 'Keep things professional — just sell',
@@ -638,7 +636,6 @@ const DAYS = [
     eventHTML(s) {
       const bonuses = [];
       if (s.flags.seniorNetwork) bonuses.push("Mrs. Chen's bridge club stops by in force");
-      if (s.flags.dogWalkerReg)  bonuses.push('the regular dog walkers are back with friends');
       const bonusLine = bonuses.length
         ? `<p class="narrative" style="color:var(--green);font-weight:600">✓ ${bonuses.join(' and ')}.</p>` : '';
       // If HOA is already causing trouble, Sal references it — sweetening his pitch
@@ -697,12 +694,6 @@ const DAYS = [
     eventTag: 'tag-quiet', eventTagLabel: '🌻 Quiet Day',
     eventHTML(s) {
       const lines = [];
-      if (s.flags.dogWalkerReg) {
-        lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
-          ✓ The dog-walking regulars show up right on schedule, and today they've brought new friends.
-          Word travels fast in the dog-walking world.
-        </p>`);
-      }
       if (s.flags.seniorNetwork) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
           ✓ Mrs. Chen's bridge club has been spreading the word. A few new faces today —
@@ -1214,8 +1205,7 @@ function simulateSales(s) {
   let flagMult = 1.0;
   const d = s.currentDay;
   if (s.flags.seniorNetwork && d >= 3) flagMult *= 1.10;
-  if (s.flags.dogWalkerReg  && d >= 3 && d <= 4) flagMult *= 1.08;
-  if (s.flags.mobFront      && d >= 4) flagMult *= 1.40;
+if (s.flags.mobFront      && d >= 4) flagMult *= 1.40;
 
   const price = s.day.pricePerCup;
   const priceEffect = Math.max(0.2, 1.0 - (price - 1.0) * 0.3);

@@ -825,6 +825,7 @@ function freshState() {
       // Cross-branch
       mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
       marcoWarnedAboutSal: false, salKnowsMarcoWarned: false,
+      chenBriefedPlayer: false,
       // Community
       seniorNetwork: false,
     },
@@ -868,6 +869,13 @@ const DAYS = [
         "Name's <strong>Pemberton</strong>. Homeowners' Association." He taps the clipboard.
         "You need a <em>Neighborhood Vendor Permit</em> to operate here. That's eight dollars.
         Or…" he lowers his voice, "you could make this worth my while another way."
+      </p>
+      <p class="narrative">
+        He glances briefly at the house on the corner — the one with the window boxes and the
+        hand-lettered <em>"Fresh Jam"</em> sign in the glass — then back at you.
+        "Some people on this block will tell you the HOA doesn't have authority here.
+        They're wrong. And they know it." Something tightens at the corner of his mouth.
+        "I always win these things eventually."
       </p>`,
     choices: [
       {
@@ -900,17 +908,54 @@ const DAYS = [
     dayNum: 2, title: 'The Regulars', weather: 'cloudy', quiet: true,
     portrait: 'mrsChen',
     eventTag: 'tag-quiet', eventTagLabel: '🌿 Quiet Day',
-    eventHTML: `
-      <p class="narrative">
-        No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
-        with silver hair and flour on her apron shuffles up to the stand.
-        "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
-        Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
-      </p>
-      <p class="narrative">
-        Before you can answer, a couple of neighbors drift over, curious about the new stand.
-        One of them has been walking the same block for years and says she'll be back tomorrow.
-      </p>`,
+    eventHTML(s) {
+      // What Mrs. Chen already knows about your Day 1 situation
+      const hoaAwareness = s.flags.hoaCompliant
+        ? `<p class="narrative">
+            Her eyes land on the HOA permit clipped to the front of your stand. She tilts her head.
+            "You paid Harold's fee." She says <em>Harold</em> the way you'd say a word you've
+            stopped being angry at. "Smart. He's been running that permit line for two summers now.
+            I tried to kill it when I was still on the board — brought it to a vote three times."
+            A pause. "He found a procedural workaround each time. He's very good at that."
+            She looks at the permit and then back at you. "Still. You did the right thing."
+           </p>`
+        : s.flags.hoaHostile
+        ? `<p class="narrative">
+            She looks at you for a moment — reads something in your expression.
+            "He came by yesterday, didn't he." Not a question.
+            "Harold Pemberton. I was on that HOA board for eleven years. He joined in year nine
+            and spent the next two making every community initiative I'd built
+            as difficult as possible." She sets down her cup.
+            "He operates through paperwork. Notices, deadlines, fines. He makes you feel like
+            you're always one form behind." A quiet pause.
+            "The thing is — I know where every skeleton in that filing cabinet is buried.
+            He knows I know. That's worth something." She meets your eyes steadily.
+            "You come find me if it gets bad."
+           </p>`
+        : s.flags.hoaBribed
+        ? `<p class="narrative">
+            She notices the cups you're not counting — the ones that went to Pemberton.
+            You don't have to explain it. She just nods, slowly.
+            "Free samples." She says it the way a doctor says <em>I told you so</em>.
+            "He pulled the same thing on the Oduya family three summers ago.
+            Came back two weeks later asking for forty dollars in cash.
+            He called it an 'administration fee.'" She shakes her head.
+            "Harold doesn't stay charmed. Keep that in mind."
+           </p>`
+        : '';
+      return `
+        <p class="narrative">
+          No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
+          with silver hair and flour on her apron shuffles up to the stand.
+          "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
+          Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
+        </p>
+        ${hoaAwareness}
+        <p class="narrative">
+          Before you can answer, a couple of neighbors drift over, curious about the new stand.
+          One of them has been walking the same block for years and says she'll be back tomorrow.
+        </p>`;
+    },
     choices: [
       {
         label: 'Pour Mrs. Chen a free cup and chat',
@@ -919,6 +964,8 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 0.97; // lose ~1 cup worth
           s.flags.seniorNetwork = true;
+          // If she briefed you about Pemberton, you now have leverage for Day 5
+          if (s.flags.hoaHostile || s.flags.hoaBribed) s.flags.chenBriefedPlayer = true;
         }
       },
       {
@@ -1151,6 +1198,14 @@ const DAYS = [
             "I was on this HOA board for eleven years," she says, eyes hard.
             "I know where every skeleton is buried. Pemberton knows it too."
             She parks herself in the fold-up chair beside your stand and doesn't move.
+          </p>
+          <p class="narrative" style="color:var(--muted)">
+            When Pemberton rounds the corner and sees her sitting there, he stops walking.
+            Not for long — half a second, maybe — but you notice it.
+            They look at each other across twenty feet of sidewalk.
+            "Margaret," he says, stiffly. "Harold," she replies. One word each.
+            Then they both look at you, and neither of them says another word to the other
+            for the rest of the morning. They don't need to.
           </p>`
         : '';
 
@@ -1259,31 +1314,42 @@ const DAYS = [
           effect(s) { s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew'; s.day.customerMult *= 1.10; s.flags.bulliesAllied = true; } },
       ];
     },
-    hoaChoices: [
-      {
-        label: "Pay the fine ($15) and comply",
-        hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
-        cost: '-$15.00 fine',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
-      },
-      {
-        label: "Fight it — call his bluff",
-        hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
-        cost: '-50% customers today (distracted)',
-        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
-      },
-      {
-        label: "Ask neighbors to vouch for you",
-        hint: "You run to Mrs. Chen. She comes out immediately. Pemberton retreats, muttering.",
-        bonus: 'HOA resolved if you have community support',
-        effect(s) {
-          const hasSupport = s.flags.seniorNetwork;
-          if (hasSupport) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
-          else { s.flags.hoaVouchedNeighbors = true; } // unresolved into Day 7
-          s.day.hoaEventResolved = true;
-        }
-      },
-    ],
+    hoaChoices(s) {
+      const base = [
+        {
+          label: "Pay the fine ($15) and comply",
+          hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
+          cost: '-$15.00 fine',
+          effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
+        },
+        {
+          label: "Fight it — call his bluff",
+          hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
+          cost: '-50% customers today (distracted)',
+          effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
+        },
+        s.flags.chenBriefedPlayer
+        ? {
+            label: "Let Mrs. Chen speak — she's right here",
+            hint: "She stands up slowly and says three words to Pemberton. You don't catch all of them, but you hear \"Kowalski variance\" and \"2019.\" Pemberton goes pale. He leaves without another word.",
+            bonus: 'HOA fully resolved — no cost',
+            effect(s) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.flags.hoaBribed = false; s.day.hoaEventResolved = true; }
+          }
+        : {
+            label: "Ask neighbors to vouch for you",
+            hint: s.flags.seniorNetwork
+              ? "You run to Mrs. Chen. She comes out immediately. Pemberton retreats, muttering."
+              : "You knock on a few doors. Enough people come out that Pemberton backs down — for now.",
+            bonus: 'HOA resolved if you have community support',
+            effect(s) {
+              if (s.flags.seniorNetwork) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
+              else { s.flags.hoaVouchedNeighbors = true; }
+              s.day.hoaEventResolved = true;
+            }
+          },
+      ];
+      return base;
+    },
   },
 
   /* ─── DAY 6: The Squeeze ───────────────────────────── */
@@ -1524,8 +1590,16 @@ const DAYS = [
       // Community rally — HOA + senior network
       if (s.flags.hoaCompliant && s.flags.seniorNetwork) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
-          ✓ Mr. Pemberton stops by — not with a clipboard, but with a smile.
-          Mrs. Chen is right behind him with half the bridge club. "We told the whole street," she says.
+          ✓ Pemberton stops by — not with a clipboard, but with a smile that looks like it cost him something.
+          Mrs. Chen is right behind him, and from ten feet away you can tell she is the reason he is here.
+          He knows it too. "Good operation," he says. "Clean. By the book." He shakes your hand briefly
+          and steps aside.
+        </p>
+        <p class="narrative">
+          Mrs. Chen leans in as he walks off toward the end of the block. "Took me three days to convince him."
+          She pats your hand. "I reminded him about the Kowalski variance of 2019."
+          She doesn't explain what that means. She doesn't need to. "He'll be fine," she says,
+          watching him go. "He's better when someone's keeping score."
         </p>`);
         s.day.customerMult *= 1.15;
       }
@@ -1580,6 +1654,19 @@ const DAYS = [
           : `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
              permit fee or we shut this down right now."`;
         lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
+        // Mrs. Chen intervenes if she's in the senior network — uses her leverage publicly
+        if (s.flags.seniorNetwork) {
+          lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
+            Before you can answer, Mrs. Chen is already walking across the street toward the inspector —
+            not Pemberton. She shakes the inspector's hand and begins talking quietly.
+            You catch the words <em>"eleven years,"</em> <em>"board minutes,"</em>
+            and then something about a specific variance that makes the inspector frown and
+            flip back through his clipboard.
+            Pemberton watches this and says nothing. He's watching the way someone watches
+            a door they thought was locked turn out not to be.
+          </p>`);
+          s.day.customerMult *= 1.05; // partial relief — situation defused but not resolved
+        }
       }
 
       if (!lines.length) {
@@ -1931,6 +2018,9 @@ function currentPortrait(overrideKey) {
 function getChoices(cfg) {
   return typeof cfg.choices === 'function' ? cfg.choices(gs) : cfg.choices;
 }
+function resolveChoices(choicesOrFn) {
+  return typeof choicesOrFn === 'function' ? choicesOrFn(gs) : choicesOrFn;
+}
 
 function btn(id, handler) {
   const el = document.getElementById(id);
@@ -2032,9 +2122,9 @@ function renderEvent() {
         ${eventBody}
         <hr class="sep">
         <p style="font-weight:700;margin-bottom:.5rem;">How do you handle Pemberton?</p>
-        <div class="choices">${renderChoiceButtons(cfg.hoaChoices)}</div>
+        <div class="choices">${renderChoiceButtons(resolveChoices(cfg.hoaChoices))}</div>
       </div>`);
-    attachChoiceBtns(cfg.hoaChoices, (choice) => {
+    attachChoiceBtns(resolveChoices(cfg.hoaChoices), (choice) => {
       choice.effect(gs);
       if (gs.flags.hoaShutDown) { renderShutdown(); return; }
       setTimeout(() => renderBulliesChoice(), 400);

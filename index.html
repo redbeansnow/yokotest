@@ -535,7 +535,7 @@
       margin-top: 2px;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="app">
@@ -2487,12 +2487,15 @@ function renderMobTakeover() {
 /* ── LEADERBOARD ─────────────────────────────────────────────── */
 const LB_NAME_KEY = 'lemonade_lb_name';
 
-const _sb = supabase.createClient(
-  'https://cxgtmtwhtyobwdgzisav.supabase.co',
-  'sb_publishable_RZx87BTo1JJXpCeKGmngBw_SrfxVslY'
-);
+const _sb = typeof supabase !== 'undefined'
+  ? supabase.createClient(
+      'https://cxgtmtwhtyobwdgzisav.supabase.co',
+      'sb_publishable_RZx87BTo1JJXpCeKGmngBw_SrfxVslY'
+    )
+  : null;
 
 async function sbFetch() {
+  if (!_sb) return null;
   const { data, error } = await _sb.from('leaderboard')
     .select('name, profit, cups_sold, ending, created_at')
     .order('profit', { ascending: false })
@@ -2501,6 +2504,7 @@ async function sbFetch() {
 }
 
 async function sbSave(name, profit, endingKey) {
+  if (!_sb) return false;
   const cups_sold = gs.ledger.reduce((s, e) => s + e.cups, 0);
   const { error } = await _sb.from('leaderboard').insert({
     name: (name || 'Anonymous').trim().slice(0, 24),
@@ -2568,9 +2572,11 @@ async function renderLbSection(containerId, profit, endingKey, alreadySaved) {
     </div>`}
     <div id="lb-table-wrap"><p class="lb-empty">Loading scores…</p></div>`;
 
-  const board = await sbFetch() || [];
+  const board = await sbFetch();
   const wrap = document.getElementById('lb-table-wrap');
-  if (wrap) wrap.innerHTML = lbRenderTable(board, -1);
+  if (wrap) wrap.innerHTML = board
+    ? lbRenderTable(board, -1)
+    : '<p class="lb-empty">Leaderboard unavailable — check your connection.</p>';
 
   if (!alreadySaved) {
     const submitBtn = document.getElementById('lb-submit-btn');

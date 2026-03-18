@@ -586,6 +586,7 @@ const WEATHER = {
    CHARACTER PORTRAITS
 ═══════════════════════════════════════════════════════════════ */
 const PORTRAITS = {
+  /* Pemberton — Black / African-American */
   pemberton: {
     name: 'Pemberton',
     role: 'HOA Board',
@@ -604,7 +605,7 @@ const PORTRAITS = {
       <text x="42" y="113" text-anchor="middle" font-family="sans-serif" font-size="5" font-weight="bold" fill="#b8860b">HOA</text>
       <!-- left arm -->
       <path d="M18 94 L8 132" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
-      <ellipse cx="8" cy="135" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="8" cy="135" rx="6" ry="5" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- right arm with clipboard -->
       <path d="M102 94 L114 128" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
       <!-- clipboard -->
@@ -613,36 +614,41 @@ const PORTRAITS = {
       <line x1="109" y1="118" x2="121" y2="118" stroke="#bbb" stroke-width="1"/>
       <line x1="109" y1="122" x2="121" y2="122" stroke="#bbb" stroke-width="1"/>
       <line x1="109" y1="126" x2="119" y2="126" stroke="#bbb" stroke-width="1"/>
-      <ellipse cx="114" cy="131" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="114" cy="131" rx="6" ry="5" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- neck -->
-      <rect x="55" y="78" width="10" height="12" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="78" width="10" height="12" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- head -->
-      <ellipse cx="60" cy="52" rx="26" ry="28" fill="#f5c0a0" stroke="#1a1208" stroke-width="2"/>
-      <!-- thinning hair -->
-      <path d="M36 44 Q44 18 60 16 Q76 18 84 44 Q76 26 60 25 Q44 26 36 44Z" fill="#8B6914" stroke="#5a3a00" stroke-width="1"/>
-      <!-- bald spot hint -->
-      <ellipse cx="60" cy="28" rx="7" ry="5" fill="#f5c0a0" opacity="0.5"/>
+      <ellipse cx="60" cy="52" rx="26" ry="28" fill="#6a3820" stroke="#2a1008" stroke-width="2"/>
+      <!-- close-cropped natural hair — dark rounded cap -->
+      <path d="M34 46 Q36 18 60 16 Q84 18 86 46 Q80 22 60 21 Q40 22 34 46Z" fill="#120804" stroke="#0a0402" stroke-width="1"/>
+      <!-- slight hair texture bumps -->
+      <path d="M38 32 Q44 28 50 30" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M56 22 Q62 20 68 22" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M70 28 Q76 25 82 28" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
       <!-- left ear -->
-      <ellipse cx="34" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="34" cy="52" rx="5" ry="7" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- right ear -->
-      <ellipse cx="86" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="86" cy="52" rx="5" ry="7" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- furrowed brows (angled inward) -->
-      <path d="M43 38 Q50 35 57 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M63 38 Q70 35 77 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <!-- eyes (slightly narrowed) -->
-      <ellipse cx="50" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="70" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="51" cy="47" r="2.5" fill="#3a2010"/>
-      <circle cx="71" cy="47" r="2.5" fill="#3a2010"/>
+      <path d="M43 38 Q50 35 57 38" stroke="#120804" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M63 38 Q70 35 77 38" stroke="#120804" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes -->
+      <ellipse cx="50" cy="46" rx="6" ry="4" fill="white" stroke="#2a1008" stroke-width="1.5"/>
+      <ellipse cx="70" cy="46" rx="6" ry="4" fill="white" stroke="#2a1008" stroke-width="1.5"/>
+      <circle cx="51" cy="47" r="2.5" fill="#1a0c04"/>
+      <circle cx="71" cy="47" r="2.5" fill="#1a0c04"/>
       <circle cx="52" cy="46" r="1" fill="white"/>
       <circle cx="72" cy="46" r="1" fill="white"/>
-      <!-- nose -->
-      <path d="M58 56 Q56 63 60 64 Q64 63 62 56" stroke="#c49070" stroke-width="1.5" fill="none"/>
-      <!-- thin disapproving mouth -->
-      <path d="M50 70 Q60 68 70 70" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- nose (broader, rounded) -->
+      <path d="M57 55 Q53 62 60 65 Q67 62 63 55" stroke="#4a2010" stroke-width="1.5" fill="none"/>
+      <ellipse cx="56" cy="64" rx="3.5" ry="2.5" fill="#5a2c14" opacity="0.35"/>
+      <ellipse cx="64" cy="64" rx="3.5" ry="2.5" fill="#5a2c14" opacity="0.35"/>
+      <!-- fuller, thin disapproving mouth -->
+      <path d="M49 71 Q54 74 60 73 Q66 74 71 71" stroke="#2a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
     </svg>`,
   },
 
+  /* Mrs. Chen — White / Italian-American */
   mrsChen: {
     name: 'Mrs. Chen',
     role: 'Retired Baker',
@@ -665,7 +671,7 @@ const PORTRAITS = {
       <path d="M78 104 Q90 108 96 116" stroke="#d4c890" stroke-width="2" fill="none"/>
       <!-- left arm -->
       <path d="M22 90 L12 126" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
-      <ellipse cx="11" cy="129" rx="6" ry="5" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="11" cy="129" rx="6" ry="5" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- right arm + cup -->
       <path d="M98 90 L108 122" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
       <!-- small teacup -->
@@ -673,37 +679,37 @@ const PORTRAITS = {
       <path d="M116 122 Q120 124 118 127" stroke="#1a1208" stroke-width="1.5" fill="none"/>
       <line x1="104" y1="120" x2="118" y2="120" stroke="#1a1208" stroke-width="1"/>
       <!-- neck -->
-      <rect x="55" y="76" width="10" height="12" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="76" width="10" height="12" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- head (slightly smaller / petite) -->
-      <ellipse cx="60" cy="50" rx="24" ry="26" fill="#f0c090" stroke="#1a1208" stroke-width="2"/>
-      <!-- silver hair bun -->
-      <path d="M38 44 Q42 20 60 18 Q78 20 82 44 Q74 24 60 23 Q46 24 38 44Z" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
+      <ellipse cx="60" cy="50" rx="24" ry="26" fill="#f0c090" stroke="#8a5028" stroke-width="2"/>
+      <!-- silver-white hair bun (naturally aged) -->
+      <path d="M38 44 Q42 20 60 18 Q78 20 82 44 Q74 24 60 23 Q46 24 38 44Z" fill="#d0ccc8" stroke="#a0a0a0" stroke-width="1.5"/>
       <!-- bun on top -->
-      <ellipse cx="60" cy="20" rx="10" ry="9" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
-      <ellipse cx="60" cy="20" rx="6" ry="5" fill="#b8b8bc"/>
-      <!-- hair pin -->
-      <line x1="55" y1="14" x2="65" y2="14" stroke="#8888a0" stroke-width="1.5" stroke-linecap="round"/>
+      <ellipse cx="60" cy="20" rx="10" ry="9" fill="#d0ccc8" stroke="#a0a0a0" stroke-width="1.5"/>
+      <ellipse cx="60" cy="20" rx="6" ry="5" fill="#c0bcb8"/>
+      <!-- hair pin (simple silver) -->
+      <line x1="55" y1="14" x2="65" y2="14" stroke="#9898a0" stroke-width="1.5" stroke-linecap="round"/>
       <!-- ears -->
-      <ellipse cx="36" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="84" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="36" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
+      <ellipse cx="84" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- small pearl earring -->
       <circle cx="36" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
       <circle cx="84" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
       <!-- brows (gentle arched) -->
-      <path d="M44 36 Q50 33 56 35" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M64 35 Q70 33 76 36" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <!-- eyes (warm, slightly crinkled) -->
+      <path d="M44 36 Q50 33 56 35" stroke="#909090" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M64 35 Q70 33 76 36" stroke="#909090" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- eyes (warm, rounded — Western) -->
       <ellipse cx="50" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
       <ellipse cx="70" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="51" cy="45" r="2.5" fill="#3a2010"/>
-      <circle cx="71" cy="45" r="2.5" fill="#3a2010"/>
+      <circle cx="51" cy="45" r="2.5" fill="#3a6080"/>
+      <circle cx="71" cy="45" r="2.5" fill="#3a6080"/>
       <circle cx="52" cy="44" r="1" fill="white"/>
       <circle cx="72" cy="44" r="1" fill="white"/>
-      <!-- smile lines (crinkles) -->
+      <!-- smile crinkles -->
       <path d="M43 48 Q40 50 42 53" stroke="#d4a070" stroke-width="1" fill="none"/>
       <path d="M77 48 Q80 50 78 53" stroke="#d4a070" stroke-width="1" fill="none"/>
-      <!-- nose (small) -->
-      <path d="M58 53 Q56 59 60 60 Q64 59 62 53" stroke="#c49070" stroke-width="1.5" fill="none"/>
+      <!-- nose (small, slightly upturned) -->
+      <path d="M58 53 Q56 59 60 61 Q64 59 62 53" stroke="#c49070" stroke-width="1.5" fill="none"/>
       <!-- warm smile -->
       <path d="M50 67 Q60 73 70 67" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path d="M50 67 Q48 62 51 60" stroke="#1a1208" stroke-width="1.5" fill="none"/>
@@ -711,6 +717,7 @@ const PORTRAITS = {
     </svg>`,
   },
 
+  /* Big Sal — East Asian */
   bigSal: {
     name: 'Big Sal',
     role: '"Neighborhood Enterprises"',
@@ -735,41 +742,49 @@ const PORTRAITS = {
       <line x1="37" y1="100" x2="47" y2="100" stroke="#b8a060" stroke-width=".8"/>
       <!-- left arm -->
       <path d="M14 88 L6 128" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
-      <ellipse cx="6" cy="131" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="6" cy="131" rx="6" ry="5" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- right arm (slightly out — confident posture) -->
       <path d="M106 88 L114 124" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
-      <ellipse cx="114" cy="127" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="114" cy="127" rx="6" ry="5" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- neck -->
-      <rect x="55" y="74" width="10" height="12" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="74" width="10" height="12" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- head (slightly wider / imposing) -->
-      <ellipse cx="60" cy="48" rx="28" ry="28" fill="#c8a080" stroke="#1a1208" stroke-width="2"/>
-      <!-- slicked-back hair -->
-      <path d="M33 38 Q38 12 60 10 Q82 12 87 38 Q78 18 60 17 Q42 18 33 38Z" fill="#1a1208" stroke="#0a0808" stroke-width="1.5"/>
+      <ellipse cx="60" cy="48" rx="28" ry="28" fill="#d8a868" stroke="#7a4818" stroke-width="2"/>
+      <!-- slicked-back jet-black hair -->
+      <path d="M33 38 Q38 12 60 10 Q82 12 87 38 Q78 18 60 17 Q42 18 33 38Z" fill="#0e0a06" stroke="#080604" stroke-width="1.5"/>
       <!-- hair sheen -->
-      <path d="M46 18 Q52 15 60 14" stroke="#555" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
-      <!-- sideburns -->
-      <rect x="32" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
-      <rect x="83" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
+      <path d="M46 18 Q52 15 60 14" stroke="#444" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+      <!-- sideburns (straight, clean) -->
+      <rect x="32" y="38" width="4" height="14" rx="1" fill="#0e0a06"/>
+      <rect x="84" y="38" width="4" height="14" rx="1" fill="#0e0a06"/>
       <!-- ears -->
-      <ellipse cx="32" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="88" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
-      <!-- brows (flat, neutral) -->
-      <path d="M40 34 Q48 31 56 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M64 34 Q72 31 80 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <!-- eyes (steady, unreadable) -->
-      <ellipse cx="49" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="71" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="50" cy="44" r="3" fill="#1a1208"/>
-      <circle cx="72" cy="44" r="3" fill="#1a1208"/>
-      <circle cx="51" cy="43" r="1" fill="white"/>
-      <circle cx="73" cy="43" r="1" fill="white"/>
+      <ellipse cx="32" cy="50" rx="5" ry="7" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
+      <ellipse cx="88" cy="50" rx="5" ry="7" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
+      <!-- brows (flat, straight, dark — authoritative) -->
+      <path d="M39 33 Q48 31 57 33" stroke="#0e0a06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M63 33 Q72 31 81 33" stroke="#0e0a06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <!-- eyes — almond-shaped, heavy-lidded, unreadable -->
+      <path d="M42 43 Q49 38 57 43 Q49 48 42 43Z" fill="white" stroke="#1a1208" stroke-width="1.3"/>
+      <circle cx="50" cy="43" r="2.8" fill="#0e0a06"/>
+      <circle cx="51" cy="42" r="1" fill="white"/>
+      <!-- epicanthal fold left -->
+      <path d="M42 43 Q44 41 46 42" stroke="#a07840" stroke-width="1" fill="none"/>
+      <!-- right eye -->
+      <path d="M63 43 Q70 38 78 43 Q70 48 63 43Z" fill="white" stroke="#1a1208" stroke-width="1.3"/>
+      <circle cx="71" cy="43" r="2.8" fill="#0e0a06"/>
+      <circle cx="72" cy="42" r="1" fill="white"/>
+      <!-- epicanthal fold right -->
+      <path d="M63 43 Q65 41 67 42" stroke="#a07840" stroke-width="1" fill="none"/>
+      <!-- heavy upper lids -->
+      <path d="M42 40 Q49 38 57 40" stroke="#0e0a06" stroke-width="1.8" fill="none"/>
+      <path d="M63 40 Q70 38 78 40" stroke="#0e0a06" stroke-width="1.8" fill="none"/>
       <!-- slight shadow under eyes -->
-      <path d="M42 47 Q49 50 56 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
-      <path d="M64 47 Q71 50 78 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
-      <!-- nose (broader) -->
-      <path d="M57 53 Q54 62 60 64 Q66 62 63 53" stroke="#a07050" stroke-width="1.5" fill="none"/>
-      <ellipse cx="57" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
-      <ellipse cx="63" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
+      <path d="M43 47 Q50 49 57 47" stroke="#a07840" stroke-width="1" fill="none" opacity="0.5"/>
+      <path d="M63 47 Q70 49 77 47" stroke="#a07840" stroke-width="1" fill="none" opacity="0.5"/>
+      <!-- nose (broader, rounded, low bridge) -->
+      <path d="M58 52 Q55 61 60 63 Q65 61 62 52" stroke="#8a5818" stroke-width="1.5" fill="none"/>
+      <ellipse cx="57" cy="62" rx="3" ry="2" fill="#a07030" opacity="0.3"/>
+      <ellipse cx="63" cy="62" rx="3" ry="2" fill="#a07030" opacity="0.3"/>
       <!-- neutral, knowing smile — barely there -->
       <path d="M50 72 Q60 76 70 72" stroke="#1a1208" stroke-width="1.8" fill="none" stroke-linecap="round"/>
     </svg>`,

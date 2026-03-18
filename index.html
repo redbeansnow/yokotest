@@ -535,6 +535,7 @@
       margin-top: 2px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div id="app">
@@ -2484,8 +2485,31 @@ function renderMobTakeover() {
 }
 
 /* ── LEADERBOARD ─────────────────────────────────────────────── */
-const LB_KEY      = 'lemonade_lb_v1';
 const LB_NAME_KEY = 'lemonade_lb_name';
+
+const _sb = supabase.createClient(
+  'https://cxgtmtwhtyobwdgzisav.supabase.co',
+  'sb_publishable_RZx87BTo1JJXpCeKGmngBw_SrfxVslY'
+);
+
+async function sbFetch() {
+  const { data, error } = await _sb.from('leaderboard')
+    .select('name, profit, cups_sold, ending, created_at')
+    .order('profit', { ascending: false })
+    .limit(20);
+  return error ? null : data;
+}
+
+async function sbSave(name, profit, endingKey) {
+  const cups_sold = gs.ledger.reduce((s, e) => s + e.cups, 0);
+  const { error } = await _sb.from('leaderboard').insert({
+    name: (name || 'Anonymous').trim().slice(0, 24),
+    profit,
+    cups_sold,
+    ending: endingKey,
+  });
+  return !error;
+}
 
 const ENDING_EMOJI = {
   mogul:       '🏆',
@@ -2498,26 +2522,6 @@ const ENDING_EMOJI = {
   mobTakeover: '🕴️',
 };
 
-function lbGet() {
-  try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function lbSave(name, profit, endingKey) {
-  const board = lbGet();
-  const entry = {
-    name: (name || 'Anonymous').trim().slice(0, 24),
-    profit,
-    endingKey,
-    date: new Date().toLocaleDateString(),
-  };
-  board.push(entry);
-  board.sort((a, b) => b.profit - a.profit);
-  board.splice(20);
-  localStorage.setItem(LB_KEY, JSON.stringify(board));
-  localStorage.setItem(LB_NAME_KEY, entry.name);
-  return board.findIndex(e => e === board.find(x => x.name === entry.name && x.profit === profit && x.endingKey === endingKey));
-}
 
 function lbRenderTable(board, highlightIdx) {
   if (!board.length) {
@@ -2525,16 +2529,18 @@ function lbRenderTable(board, highlightIdx) {
   }
   const medals = ['🥇','🥈','🥉'];
   const rows = board.map((e, i) => {
-    const rank   = medals[i] || `#${i + 1}`;
-    const hi     = i === highlightIdx ? ' class="lb-highlight"' : '';
-    const emoji  = ENDING_EMOJI[e.endingKey] || '🍋';
-    const profit = e.profit >= 0 ? `$${e.profit.toFixed(2)}` : `-$${Math.abs(e.profit).toFixed(2)}`;
+    const rank    = medals[i] || `#${i + 1}`;
+    const hi      = i === highlightIdx ? ' class="lb-highlight"' : '';
+    const endKey  = e.endingKey || e.ending || '';
+    const emoji   = ENDING_EMOJI[endKey] || '🍋';
+    const profit  = e.profit >= 0 ? `$${(+e.profit).toFixed(2)}` : `-$${Math.abs(+e.profit).toFixed(2)}`;
+    const dateStr = e.date || (e.created_at ? new Date(e.created_at).toLocaleDateString() : '');
     return `<tr${hi}>
       <td class="lb-rank">${rank}</td>
       <td class="lb-name">${e.name}</td>
       <td class="lb-profit">${profit}</td>
-      <td class="lb-ending" title="${e.endingKey}">${emoji}</td>
-      <td class="lb-date">${e.date}</td>
+      <td class="lb-ending" title="${endKey}">${emoji}</td>
+      <td class="lb-date">${dateStr}</td>
     </tr>`;
   }).join('');
   return `<table class="lb-table">
@@ -2549,9 +2555,8 @@ function lbRenderTable(board, highlightIdx) {
   </table>`;
 }
 
-function renderLbSection(containerId, profit, endingKey, alreadySaved) {
+async function renderLbSection(containerId, profit, endingKey, alreadySaved) {
   const savedName = localStorage.getItem(LB_NAME_KEY) || '';
-  const board = lbGet();
   const section = document.getElementById(containerId);
   if (!section) return;
   section.innerHTML = `
@@ -2561,15 +2566,28 @@ function renderLbSection(containerId, profit, endingKey, alreadySaved) {
              placeholder="Your name" value="${savedName.replace(/"/g, '&quot;')}">
       <button class="lb-btn" id="lb-submit-btn">Add Score</button>
     </div>`}
-    <div id="lb-table-wrap">${lbRenderTable(board, -1)}</div>`;
+    <div id="lb-table-wrap"><p class="lb-empty">Loading scores…</p></div>`;
+
+  const board = await sbFetch() || [];
+  const wrap = document.getElementById('lb-table-wrap');
+  if (wrap) wrap.innerHTML = lbRenderTable(board, -1);
+
   if (!alreadySaved) {
-    document.getElementById('lb-submit-btn').addEventListener('click', () => {
-      const name = document.getElementById('lb-name').value;
-      const idx  = lbSave(name, profit, endingKey);
-      renderLbSection(containerId, profit, endingKey, true);
-      // re-render table with highlight
-      const b2 = lbGet();
-      document.getElementById('lb-table-wrap').innerHTML = lbRenderTable(b2, idx);
+    const submitBtn = document.getElementById('lb-submit-btn');
+    if (!submitBtn) return;
+    submitBtn.addEventListener('click', async () => {
+      const name = (document.getElementById('lb-name').value.trim() || 'Anonymous').slice(0, 24);
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving…';
+      localStorage.setItem(LB_NAME_KEY, name);
+      await sbSave(name, profit, endingKey);
+      document.querySelector('.lb-submit')?.remove();
+      const b2 = await sbFetch() || [];
+      const hiIdx = b2.findIndex(e =>
+        e.name === name && +e.profit === +profit && e.ending === endingKey
+      );
+      const wrap2 = document.getElementById('lb-table-wrap');
+      if (wrap2) wrap2.innerHTML = lbRenderTable(b2, hiIdx);
     });
   }
 }

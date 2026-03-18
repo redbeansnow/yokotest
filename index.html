@@ -974,27 +974,66 @@ const DAYS = [
       }
       return lines.join('');
     },
-    choices: [
-      {
-        label: 'Put up flyers around the neighborhood',
-        hint: "Forty minutes of your morning, a handful of thumbtacks. Word gets around.",
-        cost: '-$2.00 (supplies)',
-        bonus: '+15% customers today',
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Flyers'; s.day.customerMult *= 1.15; }
-      },
-      {
-        label: 'Offer a loyalty deal — buy 3, get 1 free',
-        hint: "People love a deal. A few regulars come back a second time.",
-        bonus: '+10% customers',
-        effect(s) { s.day.customerMult *= 1.10; s.day.pricePerCup -= 0.08; }
-      },
-      {
-        label: 'Keep things steady — quality over everything',
-        hint: "No gimmicks. Just great lemonade and good service.",
-        bonus: '+5% customers (word of mouth)',
-        effect(s) { s.day.customerMult *= 1.05; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobFront) return [
+        { label: "Keep your head down — serve everyone, no questions",
+          hint: "The money's good. You've stopped asking where it comes from.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+        { label: "Quietly ask Sal to keep his people less visible today",
+          hint: "He finds this mildly amusing. But he obliges — for now.",
+          effect(s) { s.day.customerMult *= 0.88; } },
+        { label: "Let it be known you have 'friends' — let the word spread",
+          hint: "People who were on the fence start crossing the street toward you.",
+          effect(s) { s.day.customerMult *= 1.25; } },
+      ];
+      if (s.flags.mobRefused) return [
+        { label: "Get here an hour early — sell hard before anything happens",
+          hint: "The morning is quiet. You move fast and don't look up much.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Ask a friend to come sit with you today",
+          hint: "Costs you a few dollars, but you feel less alone out here.",
+          cost: '-$3.00',
+          effect(s) { s.day.extraCost += 3; s.day.extraCostLabel = 'Backup'; s.day.customerMult *= 1.08; } },
+        { label: "Keep the routine — showing fear is worse than showing nothing",
+          hint: "Head up. Eyes forward. Business as usual.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaHostile) return [
+        { label: "Move the stand half a block — stay out of Pemberton's patrol",
+          hint: "Different corner, same lemonade. Less scrutiny.",
+          cost: '-$2.00 (relocation)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Relocation'; s.day.customerMult *= 1.10; } },
+        { label: "Stay put but keep a low profile — no signs, no calling out",
+          hint: "Harder to notice. Also harder to find.",
+          effect(s) { s.day.customerMult *= 0.90; } },
+        { label: "Go knock on the HOA office door and try to smooth things over",
+          hint: "Pemberton looks surprised you came to him. He almost smiles.",
+          effect(s) { s.flags.hoaHostile = false; s.flags.hoaBribed = false; s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaCompliant && s.flags.seniorNetwork) return [
+        { label: "Tell Mrs. Chen's bridge club today is a perfect day to visit",
+          hint: "She needs no convincing. By ten AM the corner is crowded.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Post a handmade 'Maple Street's Finest' sign",
+          hint: "A little brag never hurt. People slow down to look.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+        { label: "Let the reputation do the work — just show up and sell",
+          hint: "Word of mouth is already moving. You don't need to push.",
+          effect(s) { s.day.customerMult *= 1.08; } },
+      ];
+      return [
+        { label: 'Put up flyers around the neighborhood',
+          hint: "Forty minutes of your morning, a handful of thumbtacks. Word gets around.",
+          cost: '-$2.00 (supplies)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Flyers'; s.day.customerMult *= 1.15; } },
+        { label: 'Offer a loyalty deal — buy 3, get 1 free',
+          hint: "People love a deal. A few regulars come back a second time.",
+          effect(s) { s.day.customerMult *= 1.10; s.day.pricePerCup -= 0.08; } },
+        { label: 'Keep things steady — quality over everything',
+          hint: "No gimmicks. Just great lemonade and good service.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+    },
   },
 
   /* ─── DAY 5: The Crew ───────────────────────────────── */
@@ -1082,34 +1121,43 @@ const DAYS = [
     },
     // HOA sub-event handled in renderEvent before bully choices
     hasHoaSubEvent: true,
-    choices: [
-      {
-        label: "Confront Marco directly",
-        hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
-        cost: '-15% customers today',
-        effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; }
-      },
-      {
-        label: "Let it slide — absorb the loss",
-        hint: "You say nothing. They take what they want and move on.",
-        // mob refused = Marco takes more since he knows you have no protection
-        effect(s) {
-          s.day.customerMult *= s.flags.mobRefused ? 0.72 : 0.80;
-          s.flags.bulliesTolerated = true;
-        }
-      },
-      {
-        label: "Hire Marco's crew as security",
-        hint: "\"Five bucks. You stand here, nobody messes with the stand.\" He thinks about it. Then grins.",
-        cost: '-$5.00 security fee',
-        bonus: '+10% customers (intimidation factor)',
-        effect(s) {
-          s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew';
-          s.day.customerMult *= 1.10;
-          s.flags.bulliesAllied = true;
-        }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobRefused) return [
+        { label: "Stand your ground — you already turned down Sal, you're not backing down now",
+          hint: "Your voice doesn't shake. Marco stares at you for a long moment. Then leaves.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Offer him a flat payment to walk — end this quietly",
+          hint: "\"Eight bucks. You go, I forget I saw you.\" He takes it.",
+          cost: '-$8.00',
+          effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'Marco payoff'; s.flags.bulliesGone = true; } },
+        { label: "Let it go — you can't fight on every front today",
+          hint: "They take more than usual. You keep your mouth shut.",
+          effect(s) { s.day.customerMult *= 0.65; s.flags.bulliesTolerated = true; } },
+      ];
+      if (s.flags.mobPending) return [
+        { label: "Show Marco Sal's business card — let him draw his own conclusions",
+          hint: "His eyes go wide. He grabs his crew and they're gone before you say another word.",
+          effect(s) { s.flags.bulliesScaredByMob = true; s.flags.bulliesGone = true; } },
+        { label: "Confront Marco directly — you're not in the mood today",
+          hint: "He backs down. The scene costs you a few customers but feels worth it.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Let it slide — you have bigger decisions to make today",
+          hint: "Marco takes what he wants. You're already thinking about Sal's napkin.",
+          effect(s) { s.day.customerMult *= 0.80; s.flags.bulliesTolerated = true; } },
+      ];
+      return [
+        { label: "Confront Marco directly",
+          hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Let it slide — absorb the loss",
+          hint: "You say nothing. They take what they want and move on.",
+          effect(s) { s.day.customerMult *= 0.80; s.flags.bulliesTolerated = true; } },
+        { label: "Hire Marco's crew as security",
+          hint: "\"Five bucks. You stand here, nobody messes with the stand.\" He thinks about it. Then grins.",
+          cost: '-$5.00',
+          effect(s) { s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew'; s.day.customerMult *= 1.10; s.flags.bulliesAllied = true; } },
+      ];
+    },
     hoaChoices: [
       {
         label: "Pay the fine ($15) and comply",
@@ -1213,23 +1261,53 @@ const DAYS = [
     },
     // mob pending sub-event
     hasMobSubEvent: true,
-    choices: [
-      {
-        label: 'Pack up early — cut losses',
-        hint: 'Leave by noon. Less revenue, but no wasted ingredients.',
-        effect(s) { s.day.customerMult *= 0.50; }
-      },
-      {
-        label: 'Stay and run a "Deal of the Day" (price -$0.25)',
-        hint: 'Reduced price brings people in despite the conditions.',
-        effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.10; }
-      },
-      {
-        label: 'Move to the covered bus shelter ($2)',
-        hint: "Set up inside the bus shelter. Bad weather and bad people can't reach you.",
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Shelter fee'; s.day.customerMult *= 1.25; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobRefused) return [
+        { label: "Repair the sign and open anyway — they don't get to win",
+          hint: "You tape it back together. A few people who saw what happened stop specifically to buy.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+        { label: "Open without the sign — keep a low profile today",
+          hint: "Less visible means less of a target. You sell quietly and go home.",
+          effect(s) { s.day.customerMult *= 0.85; } },
+        { label: s.flags.seniorNetwork ? "Ask Mrs. Chen to sit with you — don't let them isolate you" : "Ask a neighbor to sit with you — don't face this alone",
+          hint: s.flags.seniorNetwork ? "She's already on her way over before you finish asking." : "A neighbor agrees. You feel less alone out here.",
+          effect(s) { s.day.customerMult *= s.flags.seniorNetwork ? 1.15 : 1.05; if (!s.flags.seniorNetwork) { s.day.extraCost += 3; s.day.extraCostLabel = 'Backup'; } } },
+      ];
+      if (s.flags.mobFront) return [
+        { label: "Run the day normally — Sal's customers are customers",
+          hint: "The numbers are good. You've stopped asking questions.",
+          effect(s) { /* mob split already applied */ } },
+        { label: "Steer only real customers today — create some distance from Sal's people",
+          hint: "You serve fewer people. Sal notices but doesn't say anything yet.",
+          effect(s) { s.day.customerMult *= 0.75; s.day.profitSplit = 0; } },
+        { label: "Double down — let word spread about your operation",
+          hint: "More people show up. Some of them you definitely didn't invite.",
+          effect(s) { s.day.customerMult *= 1.30; } },
+      ];
+      if (s.flags.bulliesGone && s.flags.seniorNetwork) return [
+        { label: "Capitalize on the buzz — run a special afternoon offer",
+          hint: "Mrs. Chen's network spreads the word before you've made a single sign.",
+          effect(s) { s.day.pricePerCup -= 0.15; s.day.customerMult *= 1.20; } },
+        { label: "Stay open an extra hour — people are coming from further away",
+          hint: "The demand is there. You prep more and stay late.",
+          cost: '-$2.00 (extra supplies)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Extra supplies'; s.day.customerMult *= 1.15; } },
+        { label: "Keep it simple — let the reputation carry today",
+          hint: "You don't need to push. The neighborhood is already talking.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+      return [
+        { label: 'Pack up early — cut losses',
+          hint: 'Leave by noon. Less revenue, but no wasted ingredients.',
+          effect(s) { s.day.customerMult *= 0.50; } },
+        { label: 'Stay and run a "Deal of the Day" (price -$0.25)',
+          hint: 'Reduced price brings people in despite the conditions.',
+          effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.10; } },
+        { label: 'Move to the covered bus shelter ($2)',
+          hint: "Set up inside the bus shelter. Bad weather and bad people can't reach you.",
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Shelter fee'; s.day.customerMult *= 1.25; } },
+      ];
+    },
     mobPendingChoices: [
       {
         label: "Accept Big Sal's deal",
@@ -1373,35 +1451,66 @@ const DAYS = [
     hasDay7HoaSettle: true,
     hasBulliesAlliedCut: true,
     hasMobBuyout: true,
-    choices: [
-      {
-        label: "Double batch + premium pricing",
-        hint: "Go big. More lemonade, slightly higher price for the excitement.",
-        cost: '+$4.00 extra ingredients',
-        bonus: '+20% customers, price +$0.25',
-        effect(s) {
-          s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch';
-          s.day.customerMult *= 1.20;
-          s.day.pricePerCup += 0.25;
-        }
-      },
-      {
-        label: "Community Charity Day (donate $1/cup)",
-        hint: "Give a dollar from every cup to the school library. Word spreads instantly.",
-        bonus: '+30% customers (community goodwill)',
-        cost: '-$1.00 per cup sold',
-        effect(s) {
-          s.day.customerMult *= 1.30;
-          s.day.charityMode = true; // handled in simulateSales
-        }
-      },
-      {
-        label: "Standard push — best product, best service",
-        hint: "No gimmicks. Just a really good lemonade stand, run well.",
-        bonus: '+10% customers (reputation)',
-        effect(s) { s.day.customerMult *= 1.10; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobFront) return [
+        { label: "Give everything you've got — make today count while it still feels like yours",
+          hint: "For a few hours, the stand feels clean again. You sell hard.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Tell the regulars it's the last day — create urgency",
+          hint: "\"Closing after today.\" People who've walked past all week finally stop.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Just sell — don't get sentimental about any of it",
+          hint: "Business is business. You learned that this week.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaCompliant && s.flags.seniorNetwork) return [
+        { label: "Invite the whole neighborhood — send Mrs. Chen's bridge club out as scouts",
+          hint: "She brings a handmade banner. This was not your plan, but it works.",
+          effect(s) { s.day.customerMult *= 1.30; s.day.charityMode = true; } },
+        { label: "Double batch — there's going to be a crowd and you want to be ready",
+          hint: "You prep twice as much. You need every drop.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Let the day unfold — you've already done the hard work",
+          hint: "The reputation brings people in. You just have to be there.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+      ];
+      if (s.flags.hoaHostile && !s.flags.hoaCompliant) return [
+        { label: "Open early and sell as fast as you can before Pemberton arrives",
+          hint: "You move fast. Every cup sold before noon is a win.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+        { label: "Reach out to Pemberton before he gets here — try to end it quietly",
+          hint: "He picks up on the second ring. He sounds tired. Maybe he's tired of this too.",
+          effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA settlement'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; } },
+        { label: "Set up and face it — whatever happens, happens",
+          hint: "You're not running. Let him come.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.seniorNetwork) return [
+        { label: "Ask Mrs. Chen to bring the whole bridge club for one big last morning",
+          hint: "She's already planned it. She was just waiting to be asked.",
+          effect(s) { s.day.customerMult *= 1.20; } },
+        { label: "Run a 'Final Day Special' — reward the regulars",
+          hint: "A small discount for the people who've shown up all week.",
+          effect(s) { s.day.customerMult *= 1.15; s.day.pricePerCup -= 0.15; } },
+        { label: "Go out proud — best lemonade of the week, no gimmicks",
+          hint: "No discounts, no events. Just the best you can do on the last day you have.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+      return [
+        { label: "Double batch + premium pricing — go out big",
+          hint: "More lemonade, slightly higher price. Last-day energy is real.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Final Day Special — reward the regulars",
+          hint: "A small discount for the people who've shown up all week.",
+          effect(s) { s.day.customerMult *= 1.15; s.day.pricePerCup -= 0.15; } },
+        { label: "Standard push — best product, best service",
+          hint: "No gimmicks. Just a really good lemonade stand, run well.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+    },
     day7HoaChoices: [
       {
         label: 'Pay the $15 permit and be done with it',
@@ -1672,6 +1781,10 @@ function currentPortrait(overrideKey) {
   return key ? portraitHTML(key) : '';
 }
 
+function getChoices(cfg) {
+  return typeof cfg.choices === 'function' ? cfg.choices(gs) : cfg.choices;
+}
+
 function btn(id, handler) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('click', handler);
@@ -1910,15 +2023,16 @@ function renderBulliesChoice() {
     <div class="${cardClass} event-card">
       <span class="event-tag tag-bully">😤 Trouble Brewing</span>
       <p class="narrative">Marco and his crew are still here. What do you do?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(getChoices(cfg))}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(getChoices(cfg), (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });
 }
 
 function renderMainEventAndChoices(cfg, cardClass, eventBody) {
+  const choices = getChoices(cfg);
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
@@ -1926,9 +2040,9 @@ function renderMainEventAndChoices(cfg, cardClass, eventBody) {
       ${eventBody}
       <hr class="sep">
       <p style="font-weight:700;margin-bottom:.5rem;">What do you do?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(choices)}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(choices, (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });
@@ -1936,14 +2050,15 @@ function renderMainEventAndChoices(cfg, cardClass, eventBody) {
 
 function renderDayChoices() {
   const cfg = DAYS[gs.currentDay - 1];
+  const choices = getChoices(cfg);
   const cardClass = cfg.quiet ? 'card quiet-day' : 'card';
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
       <p class="narrative">Now — how do you run today's stand?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(choices)}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(choices, (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });

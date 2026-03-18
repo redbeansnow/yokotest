@@ -452,6 +452,58 @@
     .mt1 { margin-top: 1rem; }
     .sep  { margin: 1rem 0; border: none; border-top: 1px dashed var(--border); }
 
+    /* ── Leaderboard ─────────────────────────────────────────── */
+    .lb-section {
+      margin-top: 1.5rem;
+      background: var(--paper);
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--yellow-dk);
+      box-shadow: var(--shadow-sm);
+      padding: 1.25rem 1.5rem 1.5rem;
+      background-image: repeating-linear-gradient(
+        180deg, transparent, transparent 23px, rgba(100,140,200,.10) 24px
+      );
+    }
+    .lb-section h3 {
+      font-family: var(--font-hand); font-size: 1.25rem;
+      font-weight: 800; color: var(--yellow-dk); margin-bottom: 1rem;
+    }
+    .lb-submit {
+      display: flex; gap: .6rem; align-items: center; margin-bottom: 1.1rem; flex-wrap: wrap;
+    }
+    .lb-name-input {
+      font-family: var(--font-hand); font-size: 1rem;
+      padding: .55rem .9rem; border: 2px solid var(--border); border-radius: 3px;
+      background: #fffef5; flex: 1; max-width: 200px;
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,.06);
+    }
+    .lb-name-input:focus { outline: none; border-color: var(--yellow-dk); }
+    .lb-btn {
+      font-family: var(--font-hand); font-weight: 700; font-size: .95rem;
+      padding: .55rem 1.2rem; background: var(--yellow); color: var(--ink);
+      border: 2px solid var(--yellow-dk); border-radius: 3px; cursor: pointer;
+      box-shadow: 2px 2px 0 #8a6a00; transition: transform .1s, box-shadow .1s;
+    }
+    .lb-btn:hover { filter: brightness(1.05); }
+    .lb-btn:active { transform: translate(2px,2px); box-shadow: none; }
+    .lb-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .lb-table th {
+      text-align: left; padding: 5px 8px;
+      font-family: var(--font-hand); font-weight: 700; font-size: .88rem;
+      color: var(--yellow-dk); border-bottom: 2px solid var(--yellow);
+      background: rgba(245,197,24,.18);
+    }
+    .lb-table td { padding: 5px 8px; border-bottom: 1px solid rgba(196,168,112,.22); }
+    .lb-rank { font-family: var(--font-hand); font-weight: 700; color: var(--muted); width: 36px; text-align: center; }
+    .lb-name { font-weight: 600; }
+    .lb-profit { font-family: var(--font-hand); font-weight: 700; }
+    .lb-ending { text-align: center; font-size: 1.05rem; width: 36px; }
+    .lb-date { color: var(--muted); font-size: .76rem; }
+    .lb-highlight { background: rgba(245,197,24,.22); }
+    .lb-highlight td { font-weight: 700; }
+    .lb-empty { color: var(--muted); text-align: center; padding: 1rem; font-family: var(--font-hand); }
+
     /* ── Character portraits ────────────────────────────────────── */
     .portrait-wrap {
       text-align: center;
@@ -2246,6 +2298,97 @@ function renderMobTakeover() {
   btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
 }
 
+/* ── LEADERBOARD ─────────────────────────────────────────────── */
+const LB_KEY      = 'lemonade_lb_v1';
+const LB_NAME_KEY = 'lemonade_lb_name';
+
+const ENDING_EMOJI = {
+  mogul:       '🏆',
+  dirty:       '🍋💸',
+  aboveboard:  '📋✨',
+  crew:        '👊🍋',
+  respectable: '📈',
+  character:   '🌱',
+  civics:      '📜',
+  mobTakeover: '🕴️',
+};
+
+function lbGet() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function lbSave(name, profit, endingKey) {
+  const board = lbGet();
+  const entry = {
+    name: (name || 'Anonymous').trim().slice(0, 24),
+    profit,
+    endingKey,
+    date: new Date().toLocaleDateString(),
+  };
+  board.push(entry);
+  board.sort((a, b) => b.profit - a.profit);
+  board.splice(20);
+  localStorage.setItem(LB_KEY, JSON.stringify(board));
+  localStorage.setItem(LB_NAME_KEY, entry.name);
+  return board.findIndex(e => e === board.find(x => x.name === entry.name && x.profit === profit && x.endingKey === endingKey));
+}
+
+function lbRenderTable(board, highlightIdx) {
+  if (!board.length) {
+    return '<p class="lb-empty">No scores yet — you\'re the first!</p>';
+  }
+  const medals = ['🥇','🥈','🥉'];
+  const rows = board.map((e, i) => {
+    const rank   = medals[i] || `#${i + 1}`;
+    const hi     = i === highlightIdx ? ' class="lb-highlight"' : '';
+    const emoji  = ENDING_EMOJI[e.endingKey] || '🍋';
+    const profit = e.profit >= 0 ? `$${e.profit.toFixed(2)}` : `-$${Math.abs(e.profit).toFixed(2)}`;
+    return `<tr${hi}>
+      <td class="lb-rank">${rank}</td>
+      <td class="lb-name">${e.name}</td>
+      <td class="lb-profit">${profit}</td>
+      <td class="lb-ending" title="${e.endingKey}">${emoji}</td>
+      <td class="lb-date">${e.date}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="lb-table">
+    <thead><tr>
+      <th class="lb-rank">#</th>
+      <th>Name</th>
+      <th>Profit</th>
+      <th>Ending</th>
+      <th>Date</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderLbSection(containerId, profit, endingKey, alreadySaved) {
+  const savedName = localStorage.getItem(LB_NAME_KEY) || '';
+  const board = lbGet();
+  const section = document.getElementById(containerId);
+  if (!section) return;
+  section.innerHTML = `
+    <h3>📋 Hall of Lemonade Fame</h3>
+    ${alreadySaved ? '' : `<div class="lb-submit">
+      <input class="lb-name-input" id="lb-name" type="text" maxlength="24"
+             placeholder="Your name" value="${savedName.replace(/"/g, '&quot;')}">
+      <button class="lb-btn" id="lb-submit-btn">Add Score</button>
+    </div>`}
+    <div id="lb-table-wrap">${lbRenderTable(board, -1)}</div>`;
+  if (!alreadySaved) {
+    document.getElementById('lb-submit-btn').addEventListener('click', () => {
+      const name = document.getElementById('lb-name').value;
+      const idx  = lbSave(name, profit, endingKey);
+      renderLbSection(containerId, profit, endingKey, true);
+      // re-render table with highlight
+      const b2 = lbGet();
+      document.getElementById('lb-table-wrap').innerHTML = lbRenderTable(b2, idx);
+    });
+  }
+}
+
 /* ── ENDING ──────────────────────────────────────────────────── */
 function renderEnding() {
   const key = getEndingKey(gs);
@@ -2256,6 +2399,8 @@ function renderEnding() {
   const totalCups = gs.ledger.reduce((s, e) => s + e.cups, 0);
   const bestDay   = gs.ledger.reduce((b, e) => e.netProfit > b.netProfit ? e : b, gs.ledger[0]);
 
+  const profit = gs.totals.netProfit;
+
   setStage(`
     <div class="card ending-card">
       <span class="big-emoji">${end.emoji}</span>
@@ -2264,7 +2409,7 @@ function renderEnding() {
       <p class="end-body">${end.body}</p>
       <div class="final-stats">
         <div class="stat-box">
-          <div class="s-val">${fmt(gs.totals.netProfit)}</div>
+          <div class="s-val">${fmt(profit)}</div>
           <div class="s-lbl">Total Profit</div>
         </div>
         <div class="stat-box">
@@ -2282,10 +2427,12 @@ function renderEnding() {
       </div>
       <button class="btn-primary" id="btn-replay">Play Again</button>
       <button class="btn-secondary" id="btn-review">Review Ledger</button>
-    </div>`);
+    </div>
+    <div class="lb-section" id="lb-container"></div>`);
   document.getElementById('pnl-panel').classList.remove('hidden');
   btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
   btn('btn-review', () => { document.getElementById('pnl-panel').scrollIntoView({ behavior: 'smooth' }); });
+  renderLbSection('lb-container', profit, key, false);
 }
 
 /* ═══════════════════════════════════════════════════════════════

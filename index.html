@@ -824,6 +824,7 @@ function freshState() {
       bulliesScaredByMob: false,
       // Cross-branch
       mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
+      marcoWarnedAboutSal: false, salKnowsMarcoWarned: false,
       // Community
       seniorNetwork: false,
     },
@@ -963,6 +964,12 @@ const DAYS = [
           "In return, thirty cents on every dollar. Think of it as a partnership."
         </p>
         ${hoaAngle}
+        <p class="narrative">
+          He glances down the block where a group of teenagers has been watching your stand all morning.
+          "You'll have some local kids come around trying to tax you." He says <em>kids</em> the way someone says <em>stray cats</em>.
+          "Marco and his little crew. They think they run this block." A pause. "They don't."
+          He straightens his jacket. "That's another thing you'd get with me — stability. Nobody bothers what's mine."
+        </p>
         <p class="narrative">
           His smile doesn't quite reach his eyes.
         </p>`;
@@ -1147,7 +1154,7 @@ const DAYS = [
           </p>`
         : '';
 
-      // Mob front: Marco recognizes Big Sal's operation and backs off
+      // Mob front: Marco recognizes Big Sal's operation — backs off, but makes it personal
       if (s.flags.mobFront) {
         s.flags.bulliesScaredByMob = true;
         return `
@@ -1158,23 +1165,50 @@ const DAYS = [
             points at the business card sitting on your table. Big Sal's card.
           </p>
           <p class="narrative">
-            Marco's whole expression changes. "We're good," he says, already backing away,
-            hands raised. "We're real good here. No trouble." His crew is halfway down the
-            block before he finishes the sentence.
+            Marco's whole expression changes. He stares at the card for a long moment.
+            Something moves across his face that isn't quite fear but is related to it.
+            "Big Sal," he says quietly, almost to himself.
+          </p>
+          <p class="narrative">
+            He looks up at you. "You know what you signed up for?" He sounds almost like he's warning you.
+            "My brother and his friends had a 'deal' with Sal two summers ago. Corner of Fifth.
+            Real good little operation." He pauses. "Lasted about three weeks before Sal owned everything
+            and they were working for him." He shakes his head slowly.
+            "Your money. Your problem." He raises his hands.
+            "We're good here. No trouble." But as he walks away, he looks back once — not at you.
+            At the business card.
           </p>`;
       }
 
-      // Mob refused: Sal sent word you're unprotected — Marco is emboldened
+      // Mob refused: Sal specifically called Marco and told him you were open season
       const marcoLine = s.flags.mobRefused
         ? `<p class="narrative">
             Marco smiles wider than usual. "Heard you turned down a good offer the other day."
-            He leans on the table. "That wasn't very smart." He helps himself to four cups.
-            His crew takes more. Nobody pays.
+            He leans on the table. "Big Sal called me himself. Said anyone who tells him no
+            is open season." He says it like he finds the arrangement vaguely distasteful —
+            doing Sal's dirty work — but not distasteful enough to stop.
+            He helps himself to four cups. His crew takes more. Nobody pays.
+          </p>`
+        : s.flags.mobPending
+        ? `<p class="narrative">
+            Marco doesn't grab anything right away. He looks at the table, then looks at you.
+            "Big Sal come by yet? The guy in the suit?" He says it casually, like asking about the weather.
+            "Word is he's real interested in your little operation."
+          </p>
+          <p class="narrative">
+            He leans in, lower. "Whatever he offered you — don't. I'm serious.
+            My brother ran a setup like this, corner of Fifth. Sal came by with the same pitch.
+            Two weeks later he owned the whole thing and my brother was working for him
+            for basically nothing." He picks up one cup, drops a dollar on the table.
+            "You've got options that aren't him. Just saying."
           </p>`
         : `<p class="narrative">
             Marco shrugs at you. "Consider it a fee. For operating in our neighborhood."
             His friends laugh.
           </p>`;
+
+      // Track if Marco warned the player about Sal
+      if (s.flags.mobPending) s.flags.marcoWarnedAboutSal = true;
 
       return `
         ${hoaLines.join('')}
@@ -1295,13 +1329,34 @@ const DAYS = [
               coming by." She squeezes your hand. "Promise me you know what you're doing, dear."
              </p>`
           : '';
+        // Cross-branch: Sal is displeased if Marco is working for the player
+        const marcoConflict = s.flags.bulliesAllied
+          ? `<p class="narrative" style="color:var(--red);font-weight:600">
+              Big Sal stops mid-sentence when he spots Marco's crew hanging around the stand.
+              His expression doesn't change, but something behind his eyes does.
+              "You hired those kids." It's not a question.
+              "Marco and I have history. Not the good kind." He straightens his jacket very slowly.
+              "Get rid of them before tomorrow, or our arrangement is done."
+              He says it quietly, without heat, which somehow makes it worse.
+            </p>`
+          : '';
+        // Cross-branch: Sal knows Marco warned the player
+        const marcoWarnedLine = s.flags.marcoWarnedAboutSal && !s.flags.bulliesAllied
+          ? `<p class="narrative" style="color:var(--muted)">
+              "Heard you had a chat with Marco yesterday." Sal keeps his eyes on his phone as he says it.
+              "He tell you about his brother? That's a favorite story of his."
+              He tucks the phone away. "Convenient that he left out the part where his brother
+              tried to cut me out of the deal first." A thin smile.
+              "I hope you found his advice… unconvincing."
+            </p>`
+          : '';
         lines.push(`${chenWarning}
           <p class="narrative">
             Big Sal stops by mid-morning. He counts the cups, nods slowly.
             "You're doing well, kid. Real well." He straightens his jacket.
             "I'm thinking we make this permanent. We'll settle the details tomorrow."
             He winks and walks off without looking back.
-          </p>${hoaOffer}`);
+          </p>${marcoWarnedLine}${marcoConflict}${hoaOffer}`);
       }
       // Cross-branch: standing up to Marco + community support = reputation boost
       if (s.flags.bulliesGone && s.flags.seniorNetwork) {
@@ -1420,6 +1475,11 @@ const DAYS = [
         <p class="narrative">
           By nine AM Big Sal appears. He doesn't look angry. That's somehow worse.
           "Last chance, kid. You join us, pay us, or go home. Those are the options."
+          ${s.flags.bulliesAllied ? `He glances at Marco's crew down the block and his jaw tightens.
+          "And tell your little friends they can go home too. They can't help you here."` : ''}
+          ${s.flags.marcoWarnedAboutSal ? `He looks at you steadily.
+          "Marco's been filling your head with stories. I'm sure they were very moving."
+          A pause. "Here's my story: I'm still here. He's still on the corner. You decide what that means."` : ''}
         </p>`);
         s.day.customerMult *= 0.30; // mob harassment kills business
         return lines.join('');
@@ -1438,13 +1498,27 @@ const DAYS = [
       // Mob + bullies both present — standoff
       if (s.flags.mobFront && s.flags.bulliesAllied) {
         s.flags.mobBullyStandoff = true;
-        lines.push(`<p class="narrative">
-          Big Sal and Marco arrive within minutes of each other and immediately
-          clock the situation. Big Sal looks Marco up and down. "Didn't know the
-          kid was running with you." Marco doesn't blink. "Didn't know he was running
-          with <em>you</em>." The whole street seems to hold its breath.
-          They both turn and look at you.
-        </p>`);
+        lines.push(`
+          <p class="narrative">
+            Big Sal and Marco arrive within five minutes of each other and
+            immediately clock the situation. Sal looks Marco up and down — the way
+            someone looks at furniture they once owned.
+            "Didn't know the kid was running with you."
+          </p>
+          <p class="narrative">
+            Marco doesn't blink. "Didn't know he was running with <em>you</em>."
+            His voice is completely flat.
+            "Tell me — what happened to the setup on Fifth? The Reyes brothers?
+            Real good operation. Lasted about —"
+          </p>
+          <p class="narrative">
+            "That's enough." Sal cuts him off. Not loud. He doesn't need to be loud.
+            They've clearly done some version of this before.
+          </p>
+          <p class="narrative">
+            The whole street seems to hold its breath. They both turn and look at you.
+            You built this. You somehow ended up in the middle of whatever this is.
+          </p>`);
       }
 
       // Community rally — HOA + senior network
@@ -1473,8 +1547,14 @@ const DAYS = [
 
       if (s.flags.bulliesAllied) {
         const marcoText = s.flags.mobBullyStandoff
-          ? `Marco glances at Big Sal, then back at you. "You've got a complicated life, kid."
-             He grins slowly. "We still want in — but given the company, the price just went up."`
+          ? `Marco glances at Big Sal across the street, then back at you. "You've got a complicated life, kid."
+             He grins slowly — and there's something real in it this time, almost respect.
+             "We still want in. But given the company," he tilts his head toward Sal, "the price just went up.
+             Call it a… risk premium."`
+          : s.flags.marcoWarnedAboutSal
+          ? `Marco and the crew show up at 8am sharp. He glances around the block first — looking for Sal.
+             "Last day. We want in." He holds out a hand. "And if that suit shows up today —
+             you know what I told you. Just remember that when you're counting the money tonight."`
           : `Marco and the crew show up at 8am sharp. "Last day, right? We want in."
              They hold out their hands — they want a cut of today's sales.`;
         lines.push(`<p class="narrative">${marcoText}</p>`);

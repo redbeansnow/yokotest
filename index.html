@@ -452,6 +452,58 @@
     .mt1 { margin-top: 1rem; }
     .sep  { margin: 1rem 0; border: none; border-top: 1px dashed var(--border); }
 
+    /* ── Leaderboard ─────────────────────────────────────────── */
+    .lb-section {
+      margin-top: 1.5rem;
+      background: var(--paper);
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--yellow-dk);
+      box-shadow: var(--shadow-sm);
+      padding: 1.25rem 1.5rem 1.5rem;
+      background-image: repeating-linear-gradient(
+        180deg, transparent, transparent 23px, rgba(100,140,200,.10) 24px
+      );
+    }
+    .lb-section h3 {
+      font-family: var(--font-hand); font-size: 1.25rem;
+      font-weight: 800; color: var(--yellow-dk); margin-bottom: 1rem;
+    }
+    .lb-submit {
+      display: flex; gap: .6rem; align-items: center; margin-bottom: 1.1rem; flex-wrap: wrap;
+    }
+    .lb-name-input {
+      font-family: var(--font-hand); font-size: 1rem;
+      padding: .55rem .9rem; border: 2px solid var(--border); border-radius: 3px;
+      background: #fffef5; flex: 1; max-width: 200px;
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,.06);
+    }
+    .lb-name-input:focus { outline: none; border-color: var(--yellow-dk); }
+    .lb-btn {
+      font-family: var(--font-hand); font-weight: 700; font-size: .95rem;
+      padding: .55rem 1.2rem; background: var(--yellow); color: var(--ink);
+      border: 2px solid var(--yellow-dk); border-radius: 3px; cursor: pointer;
+      box-shadow: 2px 2px 0 #8a6a00; transition: transform .1s, box-shadow .1s;
+    }
+    .lb-btn:hover { filter: brightness(1.05); }
+    .lb-btn:active { transform: translate(2px,2px); box-shadow: none; }
+    .lb-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .lb-table th {
+      text-align: left; padding: 5px 8px;
+      font-family: var(--font-hand); font-weight: 700; font-size: .88rem;
+      color: var(--yellow-dk); border-bottom: 2px solid var(--yellow);
+      background: rgba(245,197,24,.18);
+    }
+    .lb-table td { padding: 5px 8px; border-bottom: 1px solid rgba(196,168,112,.22); }
+    .lb-rank { font-family: var(--font-hand); font-weight: 700; color: var(--muted); width: 36px; text-align: center; }
+    .lb-name { font-weight: 600; }
+    .lb-profit { font-family: var(--font-hand); font-weight: 700; }
+    .lb-ending { text-align: center; font-size: 1.05rem; width: 36px; }
+    .lb-date { color: var(--muted); font-size: .76rem; }
+    .lb-highlight { background: rgba(245,197,24,.22); }
+    .lb-highlight td { font-weight: 700; }
+    .lb-empty { color: var(--muted); text-align: center; padding: 1rem; font-family: var(--font-hand); }
+
     /* ── Character portraits ────────────────────────────────────── */
     .portrait-wrap {
       text-align: center;
@@ -534,6 +586,7 @@ const WEATHER = {
    CHARACTER PORTRAITS
 ═══════════════════════════════════════════════════════════════ */
 const PORTRAITS = {
+  /* Pemberton — Black / African-American */
   pemberton: {
     name: 'Pemberton',
     role: 'HOA Board',
@@ -552,7 +605,7 @@ const PORTRAITS = {
       <text x="42" y="113" text-anchor="middle" font-family="sans-serif" font-size="5" font-weight="bold" fill="#b8860b">HOA</text>
       <!-- left arm -->
       <path d="M18 94 L8 132" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
-      <ellipse cx="8" cy="135" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="8" cy="135" rx="6" ry="5" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- right arm with clipboard -->
       <path d="M102 94 L114 128" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
       <!-- clipboard -->
@@ -561,36 +614,41 @@ const PORTRAITS = {
       <line x1="109" y1="118" x2="121" y2="118" stroke="#bbb" stroke-width="1"/>
       <line x1="109" y1="122" x2="121" y2="122" stroke="#bbb" stroke-width="1"/>
       <line x1="109" y1="126" x2="119" y2="126" stroke="#bbb" stroke-width="1"/>
-      <ellipse cx="114" cy="131" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="114" cy="131" rx="6" ry="5" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- neck -->
-      <rect x="55" y="78" width="10" height="12" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="78" width="10" height="12" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- head -->
-      <ellipse cx="60" cy="52" rx="26" ry="28" fill="#f5c0a0" stroke="#1a1208" stroke-width="2"/>
-      <!-- thinning hair -->
-      <path d="M36 44 Q44 18 60 16 Q76 18 84 44 Q76 26 60 25 Q44 26 36 44Z" fill="#8B6914" stroke="#5a3a00" stroke-width="1"/>
-      <!-- bald spot hint -->
-      <ellipse cx="60" cy="28" rx="7" ry="5" fill="#f5c0a0" opacity="0.5"/>
+      <ellipse cx="60" cy="52" rx="26" ry="28" fill="#6a3820" stroke="#2a1008" stroke-width="2"/>
+      <!-- close-cropped natural hair — dark rounded cap -->
+      <path d="M34 46 Q36 18 60 16 Q84 18 86 46 Q80 22 60 21 Q40 22 34 46Z" fill="#120804" stroke="#0a0402" stroke-width="1"/>
+      <!-- slight hair texture bumps -->
+      <path d="M38 32 Q44 28 50 30" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M56 22 Q62 20 68 22" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M70 28 Q76 25 82 28" stroke="#1e0e08" stroke-width="1.5" fill="none" stroke-linecap="round"/>
       <!-- left ear -->
-      <ellipse cx="34" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="34" cy="52" rx="5" ry="7" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- right ear -->
-      <ellipse cx="86" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="86" cy="52" rx="5" ry="7" fill="#6a3820" stroke="#2a1008" stroke-width="1.5"/>
       <!-- furrowed brows (angled inward) -->
-      <path d="M43 38 Q50 35 57 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M63 38 Q70 35 77 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <!-- eyes (slightly narrowed) -->
-      <ellipse cx="50" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="70" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="51" cy="47" r="2.5" fill="#3a2010"/>
-      <circle cx="71" cy="47" r="2.5" fill="#3a2010"/>
+      <path d="M43 38 Q50 35 57 38" stroke="#120804" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M63 38 Q70 35 77 38" stroke="#120804" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes -->
+      <ellipse cx="50" cy="46" rx="6" ry="4" fill="white" stroke="#2a1008" stroke-width="1.5"/>
+      <ellipse cx="70" cy="46" rx="6" ry="4" fill="white" stroke="#2a1008" stroke-width="1.5"/>
+      <circle cx="51" cy="47" r="2.5" fill="#1a0c04"/>
+      <circle cx="71" cy="47" r="2.5" fill="#1a0c04"/>
       <circle cx="52" cy="46" r="1" fill="white"/>
       <circle cx="72" cy="46" r="1" fill="white"/>
-      <!-- nose -->
-      <path d="M58 56 Q56 63 60 64 Q64 63 62 56" stroke="#c49070" stroke-width="1.5" fill="none"/>
-      <!-- thin disapproving mouth -->
-      <path d="M50 70 Q60 68 70 70" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- nose (broader, rounded) -->
+      <path d="M57 55 Q53 62 60 65 Q67 62 63 55" stroke="#4a2010" stroke-width="1.5" fill="none"/>
+      <ellipse cx="56" cy="64" rx="3.5" ry="2.5" fill="#5a2c14" opacity="0.35"/>
+      <ellipse cx="64" cy="64" rx="3.5" ry="2.5" fill="#5a2c14" opacity="0.35"/>
+      <!-- fuller, thin disapproving mouth -->
+      <path d="M49 71 Q54 74 60 73 Q66 74 71 71" stroke="#2a1008" stroke-width="2.5" fill="none" stroke-linecap="round"/>
     </svg>`,
   },
 
+  /* Mrs. Chen — White / Italian-American */
   mrsChen: {
     name: 'Mrs. Chen',
     role: 'Retired Baker',
@@ -613,7 +671,7 @@ const PORTRAITS = {
       <path d="M78 104 Q90 108 96 116" stroke="#d4c890" stroke-width="2" fill="none"/>
       <!-- left arm -->
       <path d="M22 90 L12 126" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
-      <ellipse cx="11" cy="129" rx="6" ry="5" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="11" cy="129" rx="6" ry="5" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- right arm + cup -->
       <path d="M98 90 L108 122" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
       <!-- small teacup -->
@@ -621,37 +679,37 @@ const PORTRAITS = {
       <path d="M116 122 Q120 124 118 127" stroke="#1a1208" stroke-width="1.5" fill="none"/>
       <line x1="104" y1="120" x2="118" y2="120" stroke="#1a1208" stroke-width="1"/>
       <!-- neck -->
-      <rect x="55" y="76" width="10" height="12" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="76" width="10" height="12" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- head (slightly smaller / petite) -->
-      <ellipse cx="60" cy="50" rx="24" ry="26" fill="#f0c090" stroke="#1a1208" stroke-width="2"/>
-      <!-- silver hair bun -->
-      <path d="M38 44 Q42 20 60 18 Q78 20 82 44 Q74 24 60 23 Q46 24 38 44Z" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
+      <ellipse cx="60" cy="50" rx="24" ry="26" fill="#f0c090" stroke="#8a5028" stroke-width="2"/>
+      <!-- silver-white hair bun (naturally aged) -->
+      <path d="M38 44 Q42 20 60 18 Q78 20 82 44 Q74 24 60 23 Q46 24 38 44Z" fill="#d0ccc8" stroke="#a0a0a0" stroke-width="1.5"/>
       <!-- bun on top -->
-      <ellipse cx="60" cy="20" rx="10" ry="9" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
-      <ellipse cx="60" cy="20" rx="6" ry="5" fill="#b8b8bc"/>
-      <!-- hair pin -->
-      <line x1="55" y1="14" x2="65" y2="14" stroke="#8888a0" stroke-width="1.5" stroke-linecap="round"/>
+      <ellipse cx="60" cy="20" rx="10" ry="9" fill="#d0ccc8" stroke="#a0a0a0" stroke-width="1.5"/>
+      <ellipse cx="60" cy="20" rx="6" ry="5" fill="#c0bcb8"/>
+      <!-- hair pin (simple silver) -->
+      <line x1="55" y1="14" x2="65" y2="14" stroke="#9898a0" stroke-width="1.5" stroke-linecap="round"/>
       <!-- ears -->
-      <ellipse cx="36" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="84" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="36" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
+      <ellipse cx="84" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#8a5028" stroke-width="1.5"/>
       <!-- small pearl earring -->
       <circle cx="36" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
       <circle cx="84" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
       <!-- brows (gentle arched) -->
-      <path d="M44 36 Q50 33 56 35" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M64 35 Q70 33 76 36" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <!-- eyes (warm, slightly crinkled) -->
+      <path d="M44 36 Q50 33 56 35" stroke="#909090" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M64 35 Q70 33 76 36" stroke="#909090" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- eyes (warm, rounded — Western) -->
       <ellipse cx="50" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
       <ellipse cx="70" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="51" cy="45" r="2.5" fill="#3a2010"/>
-      <circle cx="71" cy="45" r="2.5" fill="#3a2010"/>
+      <circle cx="51" cy="45" r="2.5" fill="#3a6080"/>
+      <circle cx="71" cy="45" r="2.5" fill="#3a6080"/>
       <circle cx="52" cy="44" r="1" fill="white"/>
       <circle cx="72" cy="44" r="1" fill="white"/>
-      <!-- smile lines (crinkles) -->
+      <!-- smile crinkles -->
       <path d="M43 48 Q40 50 42 53" stroke="#d4a070" stroke-width="1" fill="none"/>
       <path d="M77 48 Q80 50 78 53" stroke="#d4a070" stroke-width="1" fill="none"/>
-      <!-- nose (small) -->
-      <path d="M58 53 Q56 59 60 60 Q64 59 62 53" stroke="#c49070" stroke-width="1.5" fill="none"/>
+      <!-- nose (small, slightly upturned) -->
+      <path d="M58 53 Q56 59 60 61 Q64 59 62 53" stroke="#c49070" stroke-width="1.5" fill="none"/>
       <!-- warm smile -->
       <path d="M50 67 Q60 73 70 67" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path d="M50 67 Q48 62 51 60" stroke="#1a1208" stroke-width="1.5" fill="none"/>
@@ -659,6 +717,7 @@ const PORTRAITS = {
     </svg>`,
   },
 
+  /* Big Sal — East Asian */
   bigSal: {
     name: 'Big Sal',
     role: '"Neighborhood Enterprises"',
@@ -683,41 +742,49 @@ const PORTRAITS = {
       <line x1="37" y1="100" x2="47" y2="100" stroke="#b8a060" stroke-width=".8"/>
       <!-- left arm -->
       <path d="M14 88 L6 128" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
-      <ellipse cx="6" cy="131" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="6" cy="131" rx="6" ry="5" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- right arm (slightly out — confident posture) -->
       <path d="M106 88 L114 124" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
-      <ellipse cx="114" cy="127" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="114" cy="127" rx="6" ry="5" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- neck -->
-      <rect x="55" y="74" width="10" height="12" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <rect x="55" y="74" width="10" height="12" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
       <!-- head (slightly wider / imposing) -->
-      <ellipse cx="60" cy="48" rx="28" ry="28" fill="#c8a080" stroke="#1a1208" stroke-width="2"/>
-      <!-- slicked-back hair -->
-      <path d="M33 38 Q38 12 60 10 Q82 12 87 38 Q78 18 60 17 Q42 18 33 38Z" fill="#1a1208" stroke="#0a0808" stroke-width="1.5"/>
+      <ellipse cx="60" cy="48" rx="28" ry="28" fill="#d8a868" stroke="#7a4818" stroke-width="2"/>
+      <!-- slicked-back jet-black hair -->
+      <path d="M33 38 Q38 12 60 10 Q82 12 87 38 Q78 18 60 17 Q42 18 33 38Z" fill="#0e0a06" stroke="#080604" stroke-width="1.5"/>
       <!-- hair sheen -->
-      <path d="M46 18 Q52 15 60 14" stroke="#555" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
-      <!-- sideburns -->
-      <rect x="32" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
-      <rect x="83" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
+      <path d="M46 18 Q52 15 60 14" stroke="#444" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+      <!-- sideburns (straight, clean) -->
+      <rect x="32" y="38" width="4" height="14" rx="1" fill="#0e0a06"/>
+      <rect x="84" y="38" width="4" height="14" rx="1" fill="#0e0a06"/>
       <!-- ears -->
-      <ellipse cx="32" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="88" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
-      <!-- brows (flat, neutral) -->
-      <path d="M40 34 Q48 31 56 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M64 34 Q72 31 80 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <!-- eyes (steady, unreadable) -->
-      <ellipse cx="49" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <ellipse cx="71" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
-      <circle cx="50" cy="44" r="3" fill="#1a1208"/>
-      <circle cx="72" cy="44" r="3" fill="#1a1208"/>
-      <circle cx="51" cy="43" r="1" fill="white"/>
-      <circle cx="73" cy="43" r="1" fill="white"/>
+      <ellipse cx="32" cy="50" rx="5" ry="7" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
+      <ellipse cx="88" cy="50" rx="5" ry="7" fill="#d8a868" stroke="#7a4818" stroke-width="1.5"/>
+      <!-- brows (flat, straight, dark — authoritative) -->
+      <path d="M39 33 Q48 31 57 33" stroke="#0e0a06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M63 33 Q72 31 81 33" stroke="#0e0a06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <!-- eyes — almond-shaped, heavy-lidded, unreadable -->
+      <path d="M42 43 Q49 38 57 43 Q49 48 42 43Z" fill="white" stroke="#1a1208" stroke-width="1.3"/>
+      <circle cx="50" cy="43" r="2.8" fill="#0e0a06"/>
+      <circle cx="51" cy="42" r="1" fill="white"/>
+      <!-- epicanthal fold left -->
+      <path d="M42 43 Q44 41 46 42" stroke="#a07840" stroke-width="1" fill="none"/>
+      <!-- right eye -->
+      <path d="M63 43 Q70 38 78 43 Q70 48 63 43Z" fill="white" stroke="#1a1208" stroke-width="1.3"/>
+      <circle cx="71" cy="43" r="2.8" fill="#0e0a06"/>
+      <circle cx="72" cy="42" r="1" fill="white"/>
+      <!-- epicanthal fold right -->
+      <path d="M63 43 Q65 41 67 42" stroke="#a07840" stroke-width="1" fill="none"/>
+      <!-- heavy upper lids -->
+      <path d="M42 40 Q49 38 57 40" stroke="#0e0a06" stroke-width="1.8" fill="none"/>
+      <path d="M63 40 Q70 38 78 40" stroke="#0e0a06" stroke-width="1.8" fill="none"/>
       <!-- slight shadow under eyes -->
-      <path d="M42 47 Q49 50 56 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
-      <path d="M64 47 Q71 50 78 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
-      <!-- nose (broader) -->
-      <path d="M57 53 Q54 62 60 64 Q66 62 63 53" stroke="#a07050" stroke-width="1.5" fill="none"/>
-      <ellipse cx="57" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
-      <ellipse cx="63" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
+      <path d="M43 47 Q50 49 57 47" stroke="#a07840" stroke-width="1" fill="none" opacity="0.5"/>
+      <path d="M63 47 Q70 49 77 47" stroke="#a07840" stroke-width="1" fill="none" opacity="0.5"/>
+      <!-- nose (broader, rounded, low bridge) -->
+      <path d="M58 52 Q55 61 60 63 Q65 61 62 52" stroke="#8a5818" stroke-width="1.5" fill="none"/>
+      <ellipse cx="57" cy="62" rx="3" ry="2" fill="#a07030" opacity="0.3"/>
+      <ellipse cx="63" cy="62" rx="3" ry="2" fill="#a07030" opacity="0.3"/>
       <!-- neutral, knowing smile — barely there -->
       <path d="M50 72 Q60 76 70 72" stroke="#1a1208" stroke-width="1.8" fill="none" stroke-linecap="round"/>
     </svg>`,
@@ -757,6 +824,8 @@ function freshState() {
       bulliesScaredByMob: false,
       // Cross-branch
       mobBullyStandoff: false, mobShowdown: false, mobTakenOut: false,
+      marcoWarnedAboutSal: false, salKnowsMarcoWarned: false,
+      chenBriefedPlayer: false,
       // Community
       seniorNetwork: false,
     },
@@ -800,6 +869,13 @@ const DAYS = [
         "Name's <strong>Pemberton</strong>. Homeowners' Association." He taps the clipboard.
         "You need a <em>Neighborhood Vendor Permit</em> to operate here. That's eight dollars.
         Or…" he lowers his voice, "you could make this worth my while another way."
+      </p>
+      <p class="narrative">
+        He glances briefly at the house on the corner — the one with the window boxes and the
+        hand-lettered <em>"Fresh Jam"</em> sign in the glass — then back at you.
+        "Some people on this block will tell you the HOA doesn't have authority here.
+        They're wrong. And they know it." Something tightens at the corner of his mouth.
+        "I always win these things eventually."
       </p>`,
     choices: [
       {
@@ -832,17 +908,54 @@ const DAYS = [
     dayNum: 2, title: 'The Regulars', weather: 'cloudy', quiet: true,
     portrait: 'mrsChen',
     eventTag: 'tag-quiet', eventTagLabel: '🌿 Quiet Day',
-    eventHTML: `
-      <p class="narrative">
-        No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
-        with silver hair and flour on her apron shuffles up to the stand.
-        "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
-        Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
-      </p>
-      <p class="narrative">
-        Before you can answer, a couple of neighbors drift over, curious about the new stand.
-        One of them has been walking the same block for years and says she'll be back tomorrow.
-      </p>`,
+    eventHTML(s) {
+      // What Mrs. Chen already knows about your Day 1 situation
+      const hoaAwareness = s.flags.hoaCompliant
+        ? `<p class="narrative">
+            Her eyes land on the HOA permit clipped to the front of your stand. She tilts her head.
+            "You paid Harold's fee." She says <em>Harold</em> the way you'd say a word you've
+            stopped being angry at. "Smart. He's been running that permit line for two summers now.
+            I tried to kill it when I was still on the board — brought it to a vote three times."
+            A pause. "He found a procedural workaround each time. He's very good at that."
+            She looks at the permit and then back at you. "Still. You did the right thing."
+           </p>`
+        : s.flags.hoaHostile
+        ? `<p class="narrative">
+            She looks at you for a moment — reads something in your expression.
+            "He came by yesterday, didn't he." Not a question.
+            "Harold Pemberton. I was on that HOA board for eleven years. He joined in year nine
+            and spent the next two making every community initiative I'd built
+            as difficult as possible." She sets down her cup.
+            "He operates through paperwork. Notices, deadlines, fines. He makes you feel like
+            you're always one form behind." A quiet pause.
+            "The thing is — I know where every skeleton in that filing cabinet is buried.
+            He knows I know. That's worth something." She meets your eyes steadily.
+            "You come find me if it gets bad."
+           </p>`
+        : s.flags.hoaBribed
+        ? `<p class="narrative">
+            She notices the cups you're not counting — the ones that went to Pemberton.
+            You don't have to explain it. She just nods, slowly.
+            "Free samples." She says it the way a doctor says <em>I told you so</em>.
+            "He pulled the same thing on the Oduya family three summers ago.
+            Came back two weeks later asking for forty dollars in cash.
+            He called it an 'administration fee.'" She shakes her head.
+            "Harold doesn't stay charmed. Keep that in mind."
+           </p>`
+        : '';
+      return `
+        <p class="narrative">
+          No drama today — just the neighborhood doing its thing. Around eleven, a tiny woman
+          with silver hair and flour on her apron shuffles up to the stand.
+          "<strong>Mrs. Chen</strong>," she says, extending a hand. "Retired baker.
+          Your setup reminds me of my granddaughter." She peers into the pitcher approvingly.
+        </p>
+        ${hoaAwareness}
+        <p class="narrative">
+          Before you can answer, a couple of neighbors drift over, curious about the new stand.
+          One of them has been walking the same block for years and says she'll be back tomorrow.
+        </p>`;
+    },
     choices: [
       {
         label: 'Pour Mrs. Chen a free cup and chat',
@@ -851,6 +964,8 @@ const DAYS = [
         effect(s) {
           s.day.customerMult *= 0.97; // lose ~1 cup worth
           s.flags.seniorNetwork = true;
+          // If she briefed you about Pemberton, you now have leverage for Day 5
+          if (s.flags.hoaHostile || s.flags.hoaBribed) s.flags.chenBriefedPlayer = true;
         }
       },
       {
@@ -896,6 +1011,12 @@ const DAYS = [
           "In return, thirty cents on every dollar. Think of it as a partnership."
         </p>
         ${hoaAngle}
+        <p class="narrative">
+          He glances down the block where a group of teenagers has been watching your stand all morning.
+          "You'll have some local kids come around trying to tax you." He says <em>kids</em> the way someone says <em>stray cats</em>.
+          "Marco and his little crew. They think they run this block." A pause. "They don't."
+          He straightens his jacket. "That's another thing you'd get with me — stability. Nobody bothers what's mine."
+        </p>
         <p class="narrative">
           His smile doesn't quite reach his eyes.
         </p>`;
@@ -974,27 +1095,66 @@ const DAYS = [
       }
       return lines.join('');
     },
-    choices: [
-      {
-        label: 'Put up flyers around the neighborhood',
-        hint: "Forty minutes of your morning, a handful of thumbtacks. Word gets around.",
-        cost: '-$2.00 (supplies)',
-        bonus: '+15% customers today',
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Flyers'; s.day.customerMult *= 1.15; }
-      },
-      {
-        label: 'Offer a loyalty deal — buy 3, get 1 free',
-        hint: "People love a deal. A few regulars come back a second time.",
-        bonus: '+10% customers',
-        effect(s) { s.day.customerMult *= 1.10; s.day.pricePerCup -= 0.08; }
-      },
-      {
-        label: 'Keep things steady — quality over everything',
-        hint: "No gimmicks. Just great lemonade and good service.",
-        bonus: '+5% customers (word of mouth)',
-        effect(s) { s.day.customerMult *= 1.05; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobFront) return [
+        { label: "Keep your head down — serve everyone, no questions",
+          hint: "The money's good. You've stopped asking where it comes from.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+        { label: "Quietly ask Sal to keep his people less visible today",
+          hint: "He finds this mildly amusing. But he obliges — for now.",
+          effect(s) { s.day.customerMult *= 0.88; } },
+        { label: "Let it be known you have 'friends' — let the word spread",
+          hint: "People who were on the fence start crossing the street toward you.",
+          effect(s) { s.day.customerMult *= 1.25; } },
+      ];
+      if (s.flags.mobRefused) return [
+        { label: "Get here an hour early — sell hard before anything happens",
+          hint: "The morning is quiet. You move fast and don't look up much.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Ask a friend to come sit with you today",
+          hint: "Costs you a few dollars, but you feel less alone out here.",
+          cost: '-$3.00',
+          effect(s) { s.day.extraCost += 3; s.day.extraCostLabel = 'Backup'; s.day.customerMult *= 1.08; } },
+        { label: "Keep the routine — showing fear is worse than showing nothing",
+          hint: "Head up. Eyes forward. Business as usual.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaHostile) return [
+        { label: "Move the stand half a block — stay out of Pemberton's patrol",
+          hint: "Different corner, same lemonade. Less scrutiny.",
+          cost: '-$2.00 (relocation)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Relocation'; s.day.customerMult *= 1.10; } },
+        { label: "Stay put but keep a low profile — no signs, no calling out",
+          hint: "Harder to notice. Also harder to find.",
+          effect(s) { s.day.customerMult *= 0.90; } },
+        { label: "Go knock on the HOA office door and try to smooth things over",
+          hint: "Pemberton looks surprised you came to him. He almost smiles.",
+          effect(s) { s.flags.hoaHostile = false; s.flags.hoaBribed = false; s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaCompliant && s.flags.seniorNetwork) return [
+        { label: "Tell Mrs. Chen's bridge club today is a perfect day to visit",
+          hint: "She needs no convincing. By ten AM the corner is crowded.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Post a handmade 'Maple Street's Finest' sign",
+          hint: "A little brag never hurt. People slow down to look.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+        { label: "Let the reputation do the work — just show up and sell",
+          hint: "Word of mouth is already moving. You don't need to push.",
+          effect(s) { s.day.customerMult *= 1.08; } },
+      ];
+      return [
+        { label: 'Put up flyers around the neighborhood',
+          hint: "Forty minutes of your morning, a handful of thumbtacks. Word gets around.",
+          cost: '-$2.00 (supplies)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Flyers'; s.day.customerMult *= 1.15; } },
+        { label: 'Offer a loyalty deal — buy 3, get 1 free',
+          hint: "People love a deal. A few regulars come back a second time.",
+          effect(s) { s.day.customerMult *= 1.10; s.day.pricePerCup -= 0.08; } },
+        { label: 'Keep things steady — quality over everything',
+          hint: "No gimmicks. Just great lemonade and good service.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+    },
   },
 
   /* ─── DAY 5: The Crew ───────────────────────────────── */
@@ -1038,10 +1198,18 @@ const DAYS = [
             "I was on this HOA board for eleven years," she says, eyes hard.
             "I know where every skeleton is buried. Pemberton knows it too."
             She parks herself in the fold-up chair beside your stand and doesn't move.
+          </p>
+          <p class="narrative" style="color:var(--muted)">
+            When Pemberton rounds the corner and sees her sitting there, he stops walking.
+            Not for long — half a second, maybe — but you notice it.
+            They look at each other across twenty feet of sidewalk.
+            "Margaret," he says, stiffly. "Harold," she replies. One word each.
+            Then they both look at you, and neither of them says another word to the other
+            for the rest of the morning. They don't need to.
           </p>`
         : '';
 
-      // Mob front: Marco recognizes Big Sal's operation and backs off
+      // Mob front: Marco recognizes Big Sal's operation — backs off, but makes it personal
       if (s.flags.mobFront) {
         s.flags.bulliesScaredByMob = true;
         return `
@@ -1052,23 +1220,50 @@ const DAYS = [
             points at the business card sitting on your table. Big Sal's card.
           </p>
           <p class="narrative">
-            Marco's whole expression changes. "We're good," he says, already backing away,
-            hands raised. "We're real good here. No trouble." His crew is halfway down the
-            block before he finishes the sentence.
+            Marco's whole expression changes. He stares at the card for a long moment.
+            Something moves across his face that isn't quite fear but is related to it.
+            "Big Sal," he says quietly, almost to himself.
+          </p>
+          <p class="narrative">
+            He looks up at you. "You know what you signed up for?" He sounds almost like he's warning you.
+            "My brother and his friends had a 'deal' with Sal two summers ago. Corner of Fifth.
+            Real good little operation." He pauses. "Lasted about three weeks before Sal owned everything
+            and they were working for him." He shakes his head slowly.
+            "Your money. Your problem." He raises his hands.
+            "We're good here. No trouble." But as he walks away, he looks back once — not at you.
+            At the business card.
           </p>`;
       }
 
-      // Mob refused: Sal sent word you're unprotected — Marco is emboldened
+      // Mob refused: Sal specifically called Marco and told him you were open season
       const marcoLine = s.flags.mobRefused
         ? `<p class="narrative">
             Marco smiles wider than usual. "Heard you turned down a good offer the other day."
-            He leans on the table. "That wasn't very smart." He helps himself to four cups.
-            His crew takes more. Nobody pays.
+            He leans on the table. "Big Sal called me himself. Said anyone who tells him no
+            is open season." He says it like he finds the arrangement vaguely distasteful —
+            doing Sal's dirty work — but not distasteful enough to stop.
+            He helps himself to four cups. His crew takes more. Nobody pays.
+          </p>`
+        : s.flags.mobPending
+        ? `<p class="narrative">
+            Marco doesn't grab anything right away. He looks at the table, then looks at you.
+            "Big Sal come by yet? The guy in the suit?" He says it casually, like asking about the weather.
+            "Word is he's real interested in your little operation."
+          </p>
+          <p class="narrative">
+            He leans in, lower. "Whatever he offered you — don't. I'm serious.
+            My brother ran a setup like this, corner of Fifth. Sal came by with the same pitch.
+            Two weeks later he owned the whole thing and my brother was working for him
+            for basically nothing." He picks up one cup, drops a dollar on the table.
+            "You've got options that aren't him. Just saying."
           </p>`
         : `<p class="narrative">
             Marco shrugs at you. "Consider it a fee. For operating in our neighborhood."
             His friends laugh.
           </p>`;
+
+      // Track if Marco warned the player about Sal
+      if (s.flags.mobPending) s.flags.marcoWarnedAboutSal = true;
 
       return `
         ${hoaLines.join('')}
@@ -1082,59 +1277,79 @@ const DAYS = [
     },
     // HOA sub-event handled in renderEvent before bully choices
     hasHoaSubEvent: true,
-    choices: [
-      {
-        label: "Confront Marco directly",
-        hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
-        cost: '-15% customers today',
-        effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; }
-      },
-      {
-        label: "Let it slide — absorb the loss",
-        hint: "You say nothing. They take what they want and move on.",
-        // mob refused = Marco takes more since he knows you have no protection
-        effect(s) {
-          s.day.customerMult *= s.flags.mobRefused ? 0.72 : 0.80;
-          s.flags.bulliesTolerated = true;
-        }
-      },
-      {
-        label: "Hire Marco's crew as security",
-        hint: "\"Five bucks. You stand here, nobody messes with the stand.\" He thinks about it. Then grins.",
-        cost: '-$5.00 security fee',
-        bonus: '+10% customers (intimidation factor)',
-        effect(s) {
-          s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew';
-          s.day.customerMult *= 1.10;
-          s.flags.bulliesAllied = true;
-        }
-      },
-    ],
-    hoaChoices: [
-      {
-        label: "Pay the fine ($15) and comply",
-        hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
-        cost: '-$15.00 fine',
-        effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
-      },
-      {
-        label: "Fight it — call his bluff",
-        hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
-        cost: '-50% customers today (distracted)',
-        effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
-      },
-      {
-        label: "Ask neighbors to vouch for you",
-        hint: "You run to Mrs. Chen. She comes out immediately. Pemberton retreats, muttering.",
-        bonus: 'HOA resolved if you have community support',
-        effect(s) {
-          const hasSupport = s.flags.seniorNetwork;
-          if (hasSupport) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
-          else { s.flags.hoaVouchedNeighbors = true; } // unresolved into Day 7
-          s.day.hoaEventResolved = true;
-        }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobRefused) return [
+        { label: "Stand your ground — you already turned down Sal, you're not backing down now",
+          hint: "Your voice doesn't shake. Marco stares at you for a long moment. Then leaves.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Offer him a flat payment to walk — end this quietly",
+          hint: "\"Eight bucks. You go, I forget I saw you.\" He takes it.",
+          cost: '-$8.00',
+          effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'Marco payoff'; s.flags.bulliesGone = true; } },
+        { label: "Let it go — you can't fight on every front today",
+          hint: "They take more than usual. You keep your mouth shut.",
+          effect(s) { s.day.customerMult *= 0.65; s.flags.bulliesTolerated = true; } },
+      ];
+      if (s.flags.mobPending) return [
+        { label: "Show Marco Sal's business card — let him draw his own conclusions",
+          hint: "His eyes go wide. He grabs his crew and they're gone before you say another word.",
+          effect(s) { s.flags.bulliesScaredByMob = true; s.flags.bulliesGone = true; } },
+        { label: "Confront Marco directly — you're not in the mood today",
+          hint: "He backs down. The scene costs you a few customers but feels worth it.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Let it slide — you have bigger decisions to make today",
+          hint: "Marco takes what he wants. You're already thinking about Sal's napkin.",
+          effect(s) { s.day.customerMult *= 0.80; s.flags.bulliesTolerated = true; } },
+      ];
+      return [
+        { label: "Confront Marco directly",
+          hint: "You hold his stare. He backs down — but the scene makes other customers uncomfortable.",
+          effect(s) { s.day.customerMult *= 0.85; s.flags.bulliesGone = true; } },
+        { label: "Let it slide — absorb the loss",
+          hint: "You say nothing. They take what they want and move on.",
+          effect(s) { s.day.customerMult *= 0.80; s.flags.bulliesTolerated = true; } },
+        { label: "Hire Marco's crew as security",
+          hint: "\"Five bucks. You stand here, nobody messes with the stand.\" He thinks about it. Then grins.",
+          cost: '-$5.00',
+          effect(s) { s.day.extraCost += 5; s.day.extraCostLabel = 'Security crew'; s.day.customerMult *= 1.10; s.flags.bulliesAllied = true; } },
+      ];
+    },
+    hoaChoices(s) {
+      const base = [
+        {
+          label: "Pay the fine ($15) and comply",
+          hint: "Pemberton takes the money and marks you as resolved. HOA threat gone.",
+          cost: '-$15.00 fine',
+          effect(s) { s.day.extraCost += 15; s.day.extraCostLabel = 'HOA fine'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.day.hoaEventResolved = true; }
+        },
+        {
+          label: "Fight it — call his bluff",
+          hint: "\"My parents will hear about this.\" Pemberton sputters. He leaves — but he'll be back.",
+          cost: '-50% customers today (distracted)',
+          effect(s) { s.day.customerMult *= 0.50; s.day.hoaEventResolved = true; } // HOA lingers to Day 7
+        },
+        s.flags.chenBriefedPlayer
+        ? {
+            label: "Let Mrs. Chen speak — she's right here",
+            hint: "She stands up slowly and says three words to Pemberton. You don't catch all of them, but you hear \"Kowalski variance\" and \"2019.\" Pemberton goes pale. He leaves without another word.",
+            bonus: 'HOA fully resolved — no cost',
+            effect(s) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; s.flags.hoaBribed = false; s.day.hoaEventResolved = true; }
+          }
+        : {
+            label: "Ask neighbors to vouch for you",
+            hint: s.flags.seniorNetwork
+              ? "You run to Mrs. Chen. She comes out immediately. Pemberton retreats, muttering."
+              : "You knock on a few doors. Enough people come out that Pemberton backs down — for now.",
+            bonus: 'HOA resolved if you have community support',
+            effect(s) {
+              if (s.flags.seniorNetwork) { s.flags.hoaCompliant = true; s.flags.hoaHostile = false; }
+              else { s.flags.hoaVouchedNeighbors = true; }
+              s.day.hoaEventResolved = true;
+            }
+          },
+      ];
+      return base;
+    },
   },
 
   /* ─── DAY 6: The Squeeze ───────────────────────────── */
@@ -1180,13 +1395,34 @@ const DAYS = [
               coming by." She squeezes your hand. "Promise me you know what you're doing, dear."
              </p>`
           : '';
+        // Cross-branch: Sal is displeased if Marco is working for the player
+        const marcoConflict = s.flags.bulliesAllied
+          ? `<p class="narrative" style="color:var(--red);font-weight:600">
+              Big Sal stops mid-sentence when he spots Marco's crew hanging around the stand.
+              His expression doesn't change, but something behind his eyes does.
+              "You hired those kids." It's not a question.
+              "Marco and I have history. Not the good kind." He straightens his jacket very slowly.
+              "Get rid of them before tomorrow, or our arrangement is done."
+              He says it quietly, without heat, which somehow makes it worse.
+            </p>`
+          : '';
+        // Cross-branch: Sal knows Marco warned the player
+        const marcoWarnedLine = s.flags.marcoWarnedAboutSal && !s.flags.bulliesAllied
+          ? `<p class="narrative" style="color:var(--muted)">
+              "Heard you had a chat with Marco yesterday." Sal keeps his eyes on his phone as he says it.
+              "He tell you about his brother? That's a favorite story of his."
+              He tucks the phone away. "Convenient that he left out the part where his brother
+              tried to cut me out of the deal first." A thin smile.
+              "I hope you found his advice… unconvincing."
+            </p>`
+          : '';
         lines.push(`${chenWarning}
           <p class="narrative">
             Big Sal stops by mid-morning. He counts the cups, nods slowly.
             "You're doing well, kid. Real well." He straightens his jacket.
             "I'm thinking we make this permanent. We'll settle the details tomorrow."
             He winks and walks off without looking back.
-          </p>${hoaOffer}`);
+          </p>${marcoWarnedLine}${marcoConflict}${hoaOffer}`);
       }
       // Cross-branch: standing up to Marco + community support = reputation boost
       if (s.flags.bulliesGone && s.flags.seniorNetwork) {
@@ -1213,23 +1449,53 @@ const DAYS = [
     },
     // mob pending sub-event
     hasMobSubEvent: true,
-    choices: [
-      {
-        label: 'Pack up early — cut losses',
-        hint: 'Leave by noon. Less revenue, but no wasted ingredients.',
-        effect(s) { s.day.customerMult *= 0.50; }
-      },
-      {
-        label: 'Stay and run a "Deal of the Day" (price -$0.25)',
-        hint: 'Reduced price brings people in despite the conditions.',
-        effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.10; }
-      },
-      {
-        label: 'Move to the covered bus shelter ($2)',
-        hint: "Set up inside the bus shelter. Bad weather and bad people can't reach you.",
-        effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Shelter fee'; s.day.customerMult *= 1.25; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobRefused) return [
+        { label: "Repair the sign and open anyway — they don't get to win",
+          hint: "You tape it back together. A few people who saw what happened stop specifically to buy.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+        { label: "Open without the sign — keep a low profile today",
+          hint: "Less visible means less of a target. You sell quietly and go home.",
+          effect(s) { s.day.customerMult *= 0.85; } },
+        { label: s.flags.seniorNetwork ? "Ask Mrs. Chen to sit with you — don't let them isolate you" : "Ask a neighbor to sit with you — don't face this alone",
+          hint: s.flags.seniorNetwork ? "She's already on her way over before you finish asking." : "A neighbor agrees. You feel less alone out here.",
+          effect(s) { s.day.customerMult *= s.flags.seniorNetwork ? 1.15 : 1.05; if (!s.flags.seniorNetwork) { s.day.extraCost += 3; s.day.extraCostLabel = 'Backup'; } } },
+      ];
+      if (s.flags.mobFront) return [
+        { label: "Run the day normally — Sal's customers are customers",
+          hint: "The numbers are good. You've stopped asking questions.",
+          effect(s) { /* mob split already applied */ } },
+        { label: "Steer only real customers today — create some distance from Sal's people",
+          hint: "You serve fewer people. Sal notices but doesn't say anything yet.",
+          effect(s) { s.day.customerMult *= 0.75; s.day.profitSplit = 0; } },
+        { label: "Double down — let word spread about your operation",
+          hint: "More people show up. Some of them you definitely didn't invite.",
+          effect(s) { s.day.customerMult *= 1.30; } },
+      ];
+      if (s.flags.bulliesGone && s.flags.seniorNetwork) return [
+        { label: "Capitalize on the buzz — run a special afternoon offer",
+          hint: "Mrs. Chen's network spreads the word before you've made a single sign.",
+          effect(s) { s.day.pricePerCup -= 0.15; s.day.customerMult *= 1.20; } },
+        { label: "Stay open an extra hour — people are coming from further away",
+          hint: "The demand is there. You prep more and stay late.",
+          cost: '-$2.00 (extra supplies)',
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Extra supplies'; s.day.customerMult *= 1.15; } },
+        { label: "Keep it simple — let the reputation carry today",
+          hint: "You don't need to push. The neighborhood is already talking.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+      return [
+        { label: 'Pack up early — cut losses',
+          hint: 'Leave by noon. Less revenue, but no wasted ingredients.',
+          effect(s) { s.day.customerMult *= 0.50; } },
+        { label: 'Stay and run a "Deal of the Day" (price -$0.25)',
+          hint: 'Reduced price brings people in despite the conditions.',
+          effect(s) { s.day.pricePerCup -= 0.25; s.day.customerMult *= 1.10; } },
+        { label: 'Move to the covered bus shelter ($2)',
+          hint: "Set up inside the bus shelter. Bad weather and bad people can't reach you.",
+          effect(s) { s.day.extraCost += 2; s.day.extraCostLabel = 'Shelter fee'; s.day.customerMult *= 1.25; } },
+      ];
+    },
     mobPendingChoices: [
       {
         label: "Accept Big Sal's deal",
@@ -1275,6 +1541,11 @@ const DAYS = [
         <p class="narrative">
           By nine AM Big Sal appears. He doesn't look angry. That's somehow worse.
           "Last chance, kid. You join us, pay us, or go home. Those are the options."
+          ${s.flags.bulliesAllied ? `He glances at Marco's crew down the block and his jaw tightens.
+          "And tell your little friends they can go home too. They can't help you here."` : ''}
+          ${s.flags.marcoWarnedAboutSal ? `He looks at you steadily.
+          "Marco's been filling your head with stories. I'm sure they were very moving."
+          A pause. "Here's my story: I'm still here. He's still on the corner. You decide what that means."` : ''}
         </p>`);
         s.day.customerMult *= 0.30; // mob harassment kills business
         return lines.join('');
@@ -1293,20 +1564,42 @@ const DAYS = [
       // Mob + bullies both present — standoff
       if (s.flags.mobFront && s.flags.bulliesAllied) {
         s.flags.mobBullyStandoff = true;
-        lines.push(`<p class="narrative">
-          Big Sal and Marco arrive within minutes of each other and immediately
-          clock the situation. Big Sal looks Marco up and down. "Didn't know the
-          kid was running with you." Marco doesn't blink. "Didn't know he was running
-          with <em>you</em>." The whole street seems to hold its breath.
-          They both turn and look at you.
-        </p>`);
+        lines.push(`
+          <p class="narrative">
+            Big Sal and Marco arrive within five minutes of each other and
+            immediately clock the situation. Sal looks Marco up and down — the way
+            someone looks at furniture they once owned.
+            "Didn't know the kid was running with you."
+          </p>
+          <p class="narrative">
+            Marco doesn't blink. "Didn't know he was running with <em>you</em>."
+            His voice is completely flat.
+            "Tell me — what happened to the setup on Fifth? The Reyes brothers?
+            Real good operation. Lasted about —"
+          </p>
+          <p class="narrative">
+            "That's enough." Sal cuts him off. Not loud. He doesn't need to be loud.
+            They've clearly done some version of this before.
+          </p>
+          <p class="narrative">
+            The whole street seems to hold its breath. They both turn and look at you.
+            You built this. You somehow ended up in the middle of whatever this is.
+          </p>`);
       }
 
       // Community rally — HOA + senior network
       if (s.flags.hoaCompliant && s.flags.seniorNetwork) {
         lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
-          ✓ Mr. Pemberton stops by — not with a clipboard, but with a smile.
-          Mrs. Chen is right behind him with half the bridge club. "We told the whole street," she says.
+          ✓ Pemberton stops by — not with a clipboard, but with a smile that looks like it cost him something.
+          Mrs. Chen is right behind him, and from ten feet away you can tell she is the reason he is here.
+          He knows it too. "Good operation," he says. "Clean. By the book." He shakes your hand briefly
+          and steps aside.
+        </p>
+        <p class="narrative">
+          Mrs. Chen leans in as he walks off toward the end of the block. "Took me three days to convince him."
+          She pats your hand. "I reminded him about the Kowalski variance of 2019."
+          She doesn't explain what that means. She doesn't need to. "He'll be fine," she says,
+          watching him go. "He's better when someone's keeping score."
         </p>`);
         s.day.customerMult *= 1.15;
       }
@@ -1328,8 +1621,14 @@ const DAYS = [
 
       if (s.flags.bulliesAllied) {
         const marcoText = s.flags.mobBullyStandoff
-          ? `Marco glances at Big Sal, then back at you. "You've got a complicated life, kid."
-             He grins slowly. "We still want in — but given the company, the price just went up."`
+          ? `Marco glances at Big Sal across the street, then back at you. "You've got a complicated life, kid."
+             He grins slowly — and there's something real in it this time, almost respect.
+             "We still want in. But given the company," he tilts his head toward Sal, "the price just went up.
+             Call it a… risk premium."`
+          : s.flags.marcoWarnedAboutSal
+          ? `Marco and the crew show up at 8am sharp. He glances around the block first — looking for Sal.
+             "Last day. We want in." He holds out a hand. "And if that suit shows up today —
+             you know what I told you. Just remember that when you're counting the money tonight."`
           : `Marco and the crew show up at 8am sharp. "Last day, right? We want in."
              They hold out their hands — they want a cut of today's sales.`;
         lines.push(`<p class="narrative">${marcoText}</p>`);
@@ -1355,6 +1654,19 @@ const DAYS = [
           : `⚠️ Pemberton is back with a city inspector. "Last chance — pay the $15
              permit fee or we shut this down right now."`;
         lines.push(`<p class="narrative" style="color:var(--red);font-weight:600">${pembertonText}</p>`);
+        // Mrs. Chen intervenes if she's in the senior network — uses her leverage publicly
+        if (s.flags.seniorNetwork) {
+          lines.push(`<p class="narrative" style="color:var(--green);font-weight:600">
+            Before you can answer, Mrs. Chen is already walking across the street toward the inspector —
+            not Pemberton. She shakes the inspector's hand and begins talking quietly.
+            You catch the words <em>"eleven years,"</em> <em>"board minutes,"</em>
+            and then something about a specific variance that makes the inspector frown and
+            flip back through his clipboard.
+            Pemberton watches this and says nothing. He's watching the way someone watches
+            a door they thought was locked turn out not to be.
+          </p>`);
+          s.day.customerMult *= 1.05; // partial relief — situation defused but not resolved
+        }
       }
 
       if (!lines.length) {
@@ -1373,35 +1685,66 @@ const DAYS = [
     hasDay7HoaSettle: true,
     hasBulliesAlliedCut: true,
     hasMobBuyout: true,
-    choices: [
-      {
-        label: "Double batch + premium pricing",
-        hint: "Go big. More lemonade, slightly higher price for the excitement.",
-        cost: '+$4.00 extra ingredients',
-        bonus: '+20% customers, price +$0.25',
-        effect(s) {
-          s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch';
-          s.day.customerMult *= 1.20;
-          s.day.pricePerCup += 0.25;
-        }
-      },
-      {
-        label: "Community Charity Day (donate $1/cup)",
-        hint: "Give a dollar from every cup to the school library. Word spreads instantly.",
-        bonus: '+30% customers (community goodwill)',
-        cost: '-$1.00 per cup sold',
-        effect(s) {
-          s.day.customerMult *= 1.30;
-          s.day.charityMode = true; // handled in simulateSales
-        }
-      },
-      {
-        label: "Standard push — best product, best service",
-        hint: "No gimmicks. Just a really good lemonade stand, run well.",
-        bonus: '+10% customers (reputation)',
-        effect(s) { s.day.customerMult *= 1.10; }
-      },
-    ],
+    choices(s) {
+      if (s.flags.mobFront) return [
+        { label: "Give everything you've got — make today count while it still feels like yours",
+          hint: "For a few hours, the stand feels clean again. You sell hard.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Tell the regulars it's the last day — create urgency",
+          hint: "\"Closing after today.\" People who've walked past all week finally stop.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+        { label: "Just sell — don't get sentimental about any of it",
+          hint: "Business is business. You learned that this week.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.hoaCompliant && s.flags.seniorNetwork) return [
+        { label: "Invite the whole neighborhood — send Mrs. Chen's bridge club out as scouts",
+          hint: "She brings a handmade banner. This was not your plan, but it works.",
+          effect(s) { s.day.customerMult *= 1.30; s.day.charityMode = true; } },
+        { label: "Double batch — there's going to be a crowd and you want to be ready",
+          hint: "You prep twice as much. You need every drop.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Let the day unfold — you've already done the hard work",
+          hint: "The reputation brings people in. You just have to be there.",
+          effect(s) { s.day.customerMult *= 1.15; } },
+      ];
+      if (s.flags.hoaHostile && !s.flags.hoaCompliant) return [
+        { label: "Open early and sell as fast as you can before Pemberton arrives",
+          hint: "You move fast. Every cup sold before noon is a win.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+        { label: "Reach out to Pemberton before he gets here — try to end it quietly",
+          hint: "He picks up on the second ring. He sounds tired. Maybe he's tired of this too.",
+          effect(s) { s.day.extraCost += 8; s.day.extraCostLabel = 'HOA settlement'; s.flags.hoaCompliant = true; s.flags.hoaHostile = false; } },
+        { label: "Set up and face it — whatever happens, happens",
+          hint: "You're not running. Let him come.",
+          effect(s) { s.day.customerMult *= 1.05; } },
+      ];
+      if (s.flags.seniorNetwork) return [
+        { label: "Ask Mrs. Chen to bring the whole bridge club for one big last morning",
+          hint: "She's already planned it. She was just waiting to be asked.",
+          effect(s) { s.day.customerMult *= 1.20; } },
+        { label: "Run a 'Final Day Special' — reward the regulars",
+          hint: "A small discount for the people who've shown up all week.",
+          effect(s) { s.day.customerMult *= 1.15; s.day.pricePerCup -= 0.15; } },
+        { label: "Go out proud — best lemonade of the week, no gimmicks",
+          hint: "No discounts, no events. Just the best you can do on the last day you have.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+      return [
+        { label: "Double batch + premium pricing — go out big",
+          hint: "More lemonade, slightly higher price. Last-day energy is real.",
+          cost: '+$4.00 ingredients',
+          effect(s) { s.day.extraCost += 4; s.day.extraCostLabel = 'Double batch'; s.day.customerMult *= 1.20; s.day.pricePerCup += 0.25; } },
+        { label: "Final Day Special — reward the regulars",
+          hint: "A small discount for the people who've shown up all week.",
+          effect(s) { s.day.customerMult *= 1.15; s.day.pricePerCup -= 0.15; } },
+        { label: "Standard push — best product, best service",
+          hint: "No gimmicks. Just a really good lemonade stand, run well.",
+          effect(s) { s.day.customerMult *= 1.10; } },
+      ];
+    },
     day7HoaChoices: [
       {
         label: 'Pay the $15 permit and be done with it',
@@ -1672,6 +2015,13 @@ function currentPortrait(overrideKey) {
   return key ? portraitHTML(key) : '';
 }
 
+function getChoices(cfg) {
+  return typeof cfg.choices === 'function' ? cfg.choices(gs) : cfg.choices;
+}
+function resolveChoices(choicesOrFn) {
+  return typeof choicesOrFn === 'function' ? choicesOrFn(gs) : choicesOrFn;
+}
+
 function btn(id, handler) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('click', handler);
@@ -1772,9 +2122,9 @@ function renderEvent() {
         ${eventBody}
         <hr class="sep">
         <p style="font-weight:700;margin-bottom:.5rem;">How do you handle Pemberton?</p>
-        <div class="choices">${renderChoiceButtons(cfg.hoaChoices)}</div>
+        <div class="choices">${renderChoiceButtons(resolveChoices(cfg.hoaChoices))}</div>
       </div>`);
-    attachChoiceBtns(cfg.hoaChoices, (choice) => {
+    attachChoiceBtns(resolveChoices(cfg.hoaChoices), (choice) => {
       choice.effect(gs);
       if (gs.flags.hoaShutDown) { renderShutdown(); return; }
       setTimeout(() => renderBulliesChoice(), 400);
@@ -1910,15 +2260,16 @@ function renderBulliesChoice() {
     <div class="${cardClass} event-card">
       <span class="event-tag tag-bully">😤 Trouble Brewing</span>
       <p class="narrative">Marco and his crew are still here. What do you do?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(getChoices(cfg))}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(getChoices(cfg), (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });
 }
 
 function renderMainEventAndChoices(cfg, cardClass, eventBody) {
+  const choices = getChoices(cfg);
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
@@ -1926,9 +2277,9 @@ function renderMainEventAndChoices(cfg, cardClass, eventBody) {
       ${eventBody}
       <hr class="sep">
       <p style="font-weight:700;margin-bottom:.5rem;">What do you do?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(choices)}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(choices, (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });
@@ -1936,14 +2287,15 @@ function renderMainEventAndChoices(cfg, cardClass, eventBody) {
 
 function renderDayChoices() {
   const cfg = DAYS[gs.currentDay - 1];
+  const choices = getChoices(cfg);
   const cardClass = cfg.quiet ? 'card quiet-day' : 'card';
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
       <p class="narrative">Now — how do you run today's stand?</p>
-      <div class="choices">${renderChoiceButtons(cfg.choices)}</div>
+      <div class="choices">${renderChoiceButtons(choices)}</div>
     </div>`);
-  attachChoiceBtns(cfg.choices, (choice) => {
+  attachChoiceBtns(choices, (choice) => {
     choice.effect(gs);
     setTimeout(() => renderSimulation(), 400);
   });
@@ -2131,6 +2483,97 @@ function renderMobTakeover() {
   btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
 }
 
+/* ── LEADERBOARD ─────────────────────────────────────────────── */
+const LB_KEY      = 'lemonade_lb_v1';
+const LB_NAME_KEY = 'lemonade_lb_name';
+
+const ENDING_EMOJI = {
+  mogul:       '🏆',
+  dirty:       '🍋💸',
+  aboveboard:  '📋✨',
+  crew:        '👊🍋',
+  respectable: '📈',
+  character:   '🌱',
+  civics:      '📜',
+  mobTakeover: '🕴️',
+};
+
+function lbGet() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function lbSave(name, profit, endingKey) {
+  const board = lbGet();
+  const entry = {
+    name: (name || 'Anonymous').trim().slice(0, 24),
+    profit,
+    endingKey,
+    date: new Date().toLocaleDateString(),
+  };
+  board.push(entry);
+  board.sort((a, b) => b.profit - a.profit);
+  board.splice(20);
+  localStorage.setItem(LB_KEY, JSON.stringify(board));
+  localStorage.setItem(LB_NAME_KEY, entry.name);
+  return board.findIndex(e => e === board.find(x => x.name === entry.name && x.profit === profit && x.endingKey === endingKey));
+}
+
+function lbRenderTable(board, highlightIdx) {
+  if (!board.length) {
+    return '<p class="lb-empty">No scores yet — you\'re the first!</p>';
+  }
+  const medals = ['🥇','🥈','🥉'];
+  const rows = board.map((e, i) => {
+    const rank   = medals[i] || `#${i + 1}`;
+    const hi     = i === highlightIdx ? ' class="lb-highlight"' : '';
+    const emoji  = ENDING_EMOJI[e.endingKey] || '🍋';
+    const profit = e.profit >= 0 ? `$${e.profit.toFixed(2)}` : `-$${Math.abs(e.profit).toFixed(2)}`;
+    return `<tr${hi}>
+      <td class="lb-rank">${rank}</td>
+      <td class="lb-name">${e.name}</td>
+      <td class="lb-profit">${profit}</td>
+      <td class="lb-ending" title="${e.endingKey}">${emoji}</td>
+      <td class="lb-date">${e.date}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="lb-table">
+    <thead><tr>
+      <th class="lb-rank">#</th>
+      <th>Name</th>
+      <th>Profit</th>
+      <th>Ending</th>
+      <th>Date</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderLbSection(containerId, profit, endingKey, alreadySaved) {
+  const savedName = localStorage.getItem(LB_NAME_KEY) || '';
+  const board = lbGet();
+  const section = document.getElementById(containerId);
+  if (!section) return;
+  section.innerHTML = `
+    <h3>📋 Hall of Lemonade Fame</h3>
+    ${alreadySaved ? '' : `<div class="lb-submit">
+      <input class="lb-name-input" id="lb-name" type="text" maxlength="24"
+             placeholder="Your name" value="${savedName.replace(/"/g, '&quot;')}">
+      <button class="lb-btn" id="lb-submit-btn">Add Score</button>
+    </div>`}
+    <div id="lb-table-wrap">${lbRenderTable(board, -1)}</div>`;
+  if (!alreadySaved) {
+    document.getElementById('lb-submit-btn').addEventListener('click', () => {
+      const name = document.getElementById('lb-name').value;
+      const idx  = lbSave(name, profit, endingKey);
+      renderLbSection(containerId, profit, endingKey, true);
+      // re-render table with highlight
+      const b2 = lbGet();
+      document.getElementById('lb-table-wrap').innerHTML = lbRenderTable(b2, idx);
+    });
+  }
+}
+
 /* ── ENDING ──────────────────────────────────────────────────── */
 function renderEnding() {
   const key = getEndingKey(gs);
@@ -2141,6 +2584,8 @@ function renderEnding() {
   const totalCups = gs.ledger.reduce((s, e) => s + e.cups, 0);
   const bestDay   = gs.ledger.reduce((b, e) => e.netProfit > b.netProfit ? e : b, gs.ledger[0]);
 
+  const profit = gs.totals.netProfit;
+
   setStage(`
     <div class="card ending-card">
       <span class="big-emoji">${end.emoji}</span>
@@ -2149,7 +2594,7 @@ function renderEnding() {
       <p class="end-body">${end.body}</p>
       <div class="final-stats">
         <div class="stat-box">
-          <div class="s-val">${fmt(gs.totals.netProfit)}</div>
+          <div class="s-val">${fmt(profit)}</div>
           <div class="s-lbl">Total Profit</div>
         </div>
         <div class="stat-box">
@@ -2167,10 +2612,12 @@ function renderEnding() {
       </div>
       <button class="btn-primary" id="btn-replay">Play Again</button>
       <button class="btn-secondary" id="btn-review">Review Ledger</button>
-    </div>`);
+    </div>
+    <div class="lb-section" id="lb-container"></div>`);
   document.getElementById('pnl-panel').classList.remove('hidden');
   btn('btn-replay', () => { gs = freshState(); updateHud(); renderIntro(); });
   btn('btn-review', () => { document.getElementById('pnl-panel').scrollIntoView({ behavior: 'smooth' }); });
+  renderLbSection('lb-container', profit, key, false);
 }
 
 /* ═══════════════════════════════════════════════════════════════

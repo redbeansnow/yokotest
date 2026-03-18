@@ -451,6 +451,37 @@
 
     .mt1 { margin-top: 1rem; }
     .sep  { margin: 1rem 0; border: none; border-top: 1px dashed var(--border); }
+
+    /* ── Character portraits ────────────────────────────────────── */
+    .portrait-wrap {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .portrait-frame {
+      display: inline-block;
+      background: #fff;
+      padding: 10px 10px 32px;
+      box-shadow: 2px 2px 0 #c4a870, 5px 5px 16px rgba(0,0,0,.22);
+      border: 1px solid rgba(0,0,0,.07);
+      position: relative;
+    }
+    .portrait-frame.tilt-l { transform: rotate(-2.5deg); }
+    .portrait-frame.tilt-r { transform: rotate(2.2deg); }
+    .portrait-caption {
+      font-family: var(--font-hand);
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-align: center;
+      margin-top: 8px;
+    }
+    .portrait-caption .p-role {
+      display: block;
+      font-size: .72rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -498,6 +529,211 @@ const WEATHER = {
   rainy:  { label: 'Rainy',     emoji: '🌧️', mult: 0.60, desc: 'Most folks are staying inside. Tough day ahead.', tag: 'mult-down' },
   hot:    { label: 'Heat Wave', emoji: '🔥',  mult: 1.35, desc: "Scorching hot — people are desperate for something cold.", tag: 'mult-up'  },
 };
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARACTER PORTRAITS
+═══════════════════════════════════════════════════════════════ */
+const PORTRAITS = {
+  pemberton: {
+    name: 'Pemberton',
+    role: 'HOA Board',
+    tilt: 'tilt-l',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 148" width="120" height="148" style="display:block">
+      <rect width="120" height="148" fill="#dce8f8"/>
+      <!-- khaki shorts -->
+      <rect x="28" y="132" width="64" height="16" rx="2" fill="#c8aa6e" stroke="#7a5a1e" stroke-width="1.5"/>
+      <line x1="60" y1="132" x2="60" y2="148" stroke="#b89a5e" stroke-width="1"/>
+      <!-- polo shirt -->
+      <path d="M18 94 Q38 84 56 90 L60 100 L64 90 Q82 84 102 94 L98 140 L22 140Z" fill="#4a7ab5" stroke="#1a2a4a" stroke-width="2"/>
+      <!-- collar -->
+      <path d="M56 90 Q60 102 64 90" fill="#3a6aa5" stroke="#1a2a4a" stroke-width="1.5"/>
+      <!-- HOA badge -->
+      <rect x="32" y="104" width="20" height="12" rx="2" fill="#fef9d9" stroke="#b8860b" stroke-width="1.5"/>
+      <text x="42" y="113" text-anchor="middle" font-family="sans-serif" font-size="5" font-weight="bold" fill="#b8860b">HOA</text>
+      <!-- left arm -->
+      <path d="M18 94 L8 132" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
+      <ellipse cx="8" cy="135" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- right arm with clipboard -->
+      <path d="M102 94 L114 128" stroke="#4a7ab5" stroke-width="11" stroke-linecap="round"/>
+      <!-- clipboard -->
+      <rect x="106" y="110" width="17" height="22" rx="2" fill="#fdfaf3" stroke="#1a1208" stroke-width="1.8"/>
+      <rect x="112" y="107" width="5" height="5" rx="1" fill="#c4a870" stroke="#1a1208" stroke-width="1"/>
+      <line x1="109" y1="118" x2="121" y2="118" stroke="#bbb" stroke-width="1"/>
+      <line x1="109" y1="122" x2="121" y2="122" stroke="#bbb" stroke-width="1"/>
+      <line x1="109" y1="126" x2="119" y2="126" stroke="#bbb" stroke-width="1"/>
+      <ellipse cx="114" cy="131" rx="6" ry="5" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- neck -->
+      <rect x="55" y="78" width="10" height="12" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- head -->
+      <ellipse cx="60" cy="52" rx="26" ry="28" fill="#f5c0a0" stroke="#1a1208" stroke-width="2"/>
+      <!-- thinning hair -->
+      <path d="M36 44 Q44 18 60 16 Q76 18 84 44 Q76 26 60 25 Q44 26 36 44Z" fill="#8B6914" stroke="#5a3a00" stroke-width="1"/>
+      <!-- bald spot hint -->
+      <ellipse cx="60" cy="28" rx="7" ry="5" fill="#f5c0a0" opacity="0.5"/>
+      <!-- left ear -->
+      <ellipse cx="34" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- right ear -->
+      <ellipse cx="86" cy="52" rx="5" ry="7" fill="#f5c0a0" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- furrowed brows (angled inward) -->
+      <path d="M43 38 Q50 35 57 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M63 38 Q70 35 77 38" stroke="#5a3a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes (slightly narrowed) -->
+      <ellipse cx="50" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="70" cy="46" rx="6" ry="4" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <circle cx="51" cy="47" r="2.5" fill="#3a2010"/>
+      <circle cx="71" cy="47" r="2.5" fill="#3a2010"/>
+      <circle cx="52" cy="46" r="1" fill="white"/>
+      <circle cx="72" cy="46" r="1" fill="white"/>
+      <!-- nose -->
+      <path d="M58 56 Q56 63 60 64 Q64 63 62 56" stroke="#c49070" stroke-width="1.5" fill="none"/>
+      <!-- thin disapproving mouth -->
+      <path d="M50 70 Q60 68 70 70" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>`,
+  },
+
+  mrsChen: {
+    name: 'Mrs. Chen',
+    role: 'Retired Baker',
+    tilt: 'tilt-r',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 148" width="120" height="148" style="display:block">
+      <rect width="120" height="148" fill="#fffae8"/>
+      <!-- apron skirt -->
+      <path d="M28 104 L24 148 L96 148 L92 104Z" fill="#f8f4e8" stroke="#d4c890" stroke-width="1.5"/>
+      <!-- apron bib -->
+      <rect x="42" y="88" width="36" height="30" rx="3" fill="#f8f4e8" stroke="#d4c890" stroke-width="1.5"/>
+      <!-- flour spots on apron -->
+      <circle cx="52" cy="96" r="3" fill="white" opacity="0.8"/>
+      <circle cx="68" cy="100" r="2" fill="white" opacity="0.8"/>
+      <circle cx="58" cy="106" r="2.5" fill="white" opacity="0.8"/>
+      <circle cx="74" cy="94" r="1.5" fill="white" opacity="0.8"/>
+      <!-- dress/blouse under apron -->
+      <path d="M22 90 Q38 80 42 88 L42 118 L78 118 L78 88 Q82 80 98 90 L94 148 L26 148Z" fill="#8aaa78" stroke="#4a6a38" stroke-width="1.5"/>
+      <!-- apron strings at waist -->
+      <path d="M42 104 Q30 108 24 116" stroke="#d4c890" stroke-width="2" fill="none"/>
+      <path d="M78 104 Q90 108 96 116" stroke="#d4c890" stroke-width="2" fill="none"/>
+      <!-- left arm -->
+      <path d="M22 90 L12 126" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
+      <ellipse cx="11" cy="129" rx="6" ry="5" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- right arm + cup -->
+      <path d="M98 90 L108 122" stroke="#8aaa78" stroke-width="10" stroke-linecap="round"/>
+      <!-- small teacup -->
+      <path d="M104 118 L106 130 L116 130 L118 118Z" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <path d="M116 122 Q120 124 118 127" stroke="#1a1208" stroke-width="1.5" fill="none"/>
+      <line x1="104" y1="120" x2="118" y2="120" stroke="#1a1208" stroke-width="1"/>
+      <!-- neck -->
+      <rect x="55" y="76" width="10" height="12" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- head (slightly smaller / petite) -->
+      <ellipse cx="60" cy="50" rx="24" ry="26" fill="#f0c090" stroke="#1a1208" stroke-width="2"/>
+      <!-- silver hair bun -->
+      <path d="M38 44 Q42 20 60 18 Q78 20 82 44 Q74 24 60 23 Q46 24 38 44Z" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
+      <!-- bun on top -->
+      <ellipse cx="60" cy="20" rx="10" ry="9" fill="#c8c8cc" stroke="#9898a0" stroke-width="1.5"/>
+      <ellipse cx="60" cy="20" rx="6" ry="5" fill="#b8b8bc"/>
+      <!-- hair pin -->
+      <line x1="55" y1="14" x2="65" y2="14" stroke="#8888a0" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- ears -->
+      <ellipse cx="36" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="84" cy="50" rx="5" ry="7" fill="#f0c090" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- small pearl earring -->
+      <circle cx="36" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
+      <circle cx="84" cy="54" r="2.5" fill="#f0f0f0" stroke="#c0c0c0" stroke-width="1"/>
+      <!-- brows (gentle arched) -->
+      <path d="M44 36 Q50 33 56 35" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M64 35 Q70 33 76 36" stroke="#888890" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- eyes (warm, slightly crinkled) -->
+      <ellipse cx="50" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="70" cy="44" rx="6" ry="4.5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <circle cx="51" cy="45" r="2.5" fill="#3a2010"/>
+      <circle cx="71" cy="45" r="2.5" fill="#3a2010"/>
+      <circle cx="52" cy="44" r="1" fill="white"/>
+      <circle cx="72" cy="44" r="1" fill="white"/>
+      <!-- smile lines (crinkles) -->
+      <path d="M43 48 Q40 50 42 53" stroke="#d4a070" stroke-width="1" fill="none"/>
+      <path d="M77 48 Q80 50 78 53" stroke="#d4a070" stroke-width="1" fill="none"/>
+      <!-- nose (small) -->
+      <path d="M58 53 Q56 59 60 60 Q64 59 62 53" stroke="#c49070" stroke-width="1.5" fill="none"/>
+      <!-- warm smile -->
+      <path d="M50 67 Q60 73 70 67" stroke="#1a1208" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M50 67 Q48 62 51 60" stroke="#1a1208" stroke-width="1.5" fill="none"/>
+      <path d="M70 67 Q72 62 69 60" stroke="#1a1208" stroke-width="1.5" fill="none"/>
+    </svg>`,
+  },
+
+  bigSal: {
+    name: 'Big Sal',
+    role: '"Neighborhood Enterprises"',
+    tilt: 'tilt-l',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 148" width="120" height="148" style="display:block">
+      <rect width="120" height="148" fill="#e4daf4"/>
+      <!-- suit trousers -->
+      <rect x="28" y="130" width="64" height="18" rx="2" fill="#22223a" stroke="#0a0a18" stroke-width="1.5"/>
+      <line x1="60" y1="130" x2="60" y2="148" stroke="#1a1a2a" stroke-width="1"/>
+      <!-- suit jacket body -->
+      <path d="M14 88 Q32 76 52 84 L56 96 L60 86 L64 96 L68 84 Q88 76 106 88 L102 148 L18 148Z" fill="#2a2a3e" stroke="#0a0a18" stroke-width="2"/>
+      <!-- shirt/tie visible -->
+      <path d="M52 84 L56 96 L60 86 L64 96 L68 84 Q64 90 60 88 Q56 90 52 84Z" fill="#f0f0f0" stroke="#ccc" stroke-width="1"/>
+      <!-- tie -->
+      <path d="M58 87 L56 100 L60 104 L64 100 L62 87 L60 92Z" fill="#8a1a1a" stroke="#5a0a0a" stroke-width="1"/>
+      <!-- lapels -->
+      <path d="M52 84 Q44 90 38 100 L50 96Z" fill="#1e1e2e" stroke="#0a0a18" stroke-width="1"/>
+      <path d="M68 84 Q76 90 82 100 L70 96Z" fill="#1e1e2e" stroke="#0a0a18" stroke-width="1"/>
+      <!-- breast pocket + business card -->
+      <rect x="34" y="100" width="16" height="10" rx="1" fill="#1e1e2e" stroke="#444" stroke-width="1"/>
+      <rect x="35" y="97" width="14" height="7" rx="1" fill="#f8f4e8" stroke="#c4a870" stroke-width="1"/>
+      <line x1="37" y1="100" x2="47" y2="100" stroke="#b8a060" stroke-width=".8"/>
+      <!-- left arm -->
+      <path d="M14 88 L6 128" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
+      <ellipse cx="6" cy="131" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- right arm (slightly out — confident posture) -->
+      <path d="M106 88 L114 124" stroke="#2a2a3e" stroke-width="12" stroke-linecap="round"/>
+      <ellipse cx="114" cy="127" rx="6" ry="5" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- neck -->
+      <rect x="55" y="74" width="10" height="12" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- head (slightly wider / imposing) -->
+      <ellipse cx="60" cy="48" rx="28" ry="28" fill="#c8a080" stroke="#1a1208" stroke-width="2"/>
+      <!-- slicked-back hair -->
+      <path d="M33 38 Q38 12 60 10 Q82 12 87 38 Q78 18 60 17 Q42 18 33 38Z" fill="#1a1208" stroke="#0a0808" stroke-width="1.5"/>
+      <!-- hair sheen -->
+      <path d="M46 18 Q52 15 60 14" stroke="#555" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+      <!-- sideburns -->
+      <rect x="32" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
+      <rect x="83" y="38" width="5" height="14" rx="2" fill="#1a1208"/>
+      <!-- ears -->
+      <ellipse cx="32" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="88" cy="50" rx="5" ry="7" fill="#c8a080" stroke="#1a1208" stroke-width="1.5"/>
+      <!-- brows (flat, neutral) -->
+      <path d="M40 34 Q48 31 56 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M64 34 Q72 31 80 34" stroke="#1a1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- eyes (steady, unreadable) -->
+      <ellipse cx="49" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <ellipse cx="71" cy="43" rx="7" ry="5" fill="white" stroke="#1a1208" stroke-width="1.5"/>
+      <circle cx="50" cy="44" r="3" fill="#1a1208"/>
+      <circle cx="72" cy="44" r="3" fill="#1a1208"/>
+      <circle cx="51" cy="43" r="1" fill="white"/>
+      <circle cx="73" cy="43" r="1" fill="white"/>
+      <!-- slight shadow under eyes -->
+      <path d="M42 47 Q49 50 56 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
+      <path d="M64 47 Q71 50 78 47" stroke="#b09070" stroke-width="1" fill="none" opacity="0.5"/>
+      <!-- nose (broader) -->
+      <path d="M57 53 Q54 62 60 64 Q66 62 63 53" stroke="#a07050" stroke-width="1.5" fill="none"/>
+      <ellipse cx="57" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
+      <ellipse cx="63" cy="64" rx="3" ry="2" fill="#b89070" opacity="0.4"/>
+      <!-- neutral, knowing smile — barely there -->
+      <path d="M50 72 Q60 76 70 72" stroke="#1a1208" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </svg>`,
+  },
+};
+
+function portraitHTML(key) {
+  const p = PORTRAITS[key];
+  if (!p) return '';
+  return `<div class="portrait-wrap">
+    <div class="portrait-frame ${p.tilt}">
+      ${p.svg}
+      <div class="portrait-caption">${p.name}<span class="p-role">${p.role}</span></div>
+    </div>
+  </div>`;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    GAME STATE
@@ -552,6 +788,7 @@ const DAYS = [
   /* ─── DAY 1: Grand Opening ─────────────────────────── */
   {
     dayNum: 1, title: 'Grand Opening', weather: 'sunny', quiet: false,
+    portrait: 'pemberton',
     eventTag: 'tag-hoa', eventTagLabel: '🏘️ HOA Visit',
     eventHTML: `
       <p class="narrative">
@@ -593,6 +830,7 @@ const DAYS = [
   /* ─── DAY 2: The Regulars ───────────────────────────── */
   {
     dayNum: 2, title: 'The Regulars', weather: 'cloudy', quiet: true,
+    portrait: 'mrsChen',
     eventTag: 'tag-quiet', eventTagLabel: '🌿 Quiet Day',
     eventHTML: `
       <p class="narrative">
@@ -632,6 +870,7 @@ const DAYS = [
   /* ─── DAY 3: A Stranger's Offer ─────────────────────── */
   {
     dayNum: 3, title: "A Stranger's Offer", weather: 'hot', quiet: false,
+    portrait: 'bigSal',
     eventTag: 'tag-mob', eventTagLabel: '🕴️ Suspicious Visitor',
     eventHTML(s) {
       const bonuses = [];
@@ -761,6 +1000,11 @@ const DAYS = [
   /* ─── DAY 5: The Crew ───────────────────────────────── */
   {
     dayNum: 5, title: 'The Crew', weather: 'rainy', quiet: false,
+    portrait(s) {
+      if (s.flags.hoaHostile || s.flags.hoaBribed) return 'pemberton';
+      if (s.flags.seniorNetwork && (s.flags.hoaHostile || s.flags.hoaBribed)) return 'mrsChen';
+      return null;
+    },
     eventTag: 'tag-bully', eventTagLabel: '😤 Trouble Brewing',
     // eventHTML is dynamic — see renderEvent
     eventHTML(s) {
@@ -897,6 +1141,10 @@ const DAYS = [
   {
     dayNum: 6, title: 'The Squeeze', weather: null, // determined by mob path
     quiet: false,
+    portrait(s) {
+      if (s.flags.mobRefused || s.flags.mobPending || s.flags.mobFront) return 'bigSal';
+      return null;
+    },
     eventTag: 'tag-mob', eventTagLabel: '🕴️ Consequences',
     eventHTML(s) {
       const lines = [];
@@ -1005,6 +1253,12 @@ const DAYS = [
   /* ─── DAY 7: Grand Finale ──────────────────────────── */
   {
     dayNum: 7, title: 'Grand Finale', weather: 'sunny', quiet: false,
+    portrait(s) {
+      if (s.flags.mobRefusedTwice || s.flags.mobFront) return 'bigSal';
+      if (s.flags.hoaHostile && !s.flags.hoaCompliant) return 'pemberton';
+      if (s.flags.seniorNetwork) return 'mrsChen';
+      return null;
+    },
     eventTag: 'tag-quiet', eventTagLabel: '🏁 Last Day',
     eventHTML(s) {
       const lines = [];
@@ -1410,6 +1664,14 @@ const stage = () => document.getElementById('stage');
 
 function setStage(html) { stage().innerHTML = html; }
 
+function currentPortrait(overrideKey) {
+  if (overrideKey) return portraitHTML(overrideKey);
+  const cfg = DAYS[gs.currentDay - 1];
+  if (!cfg || !cfg.portrait) return '';
+  const key = typeof cfg.portrait === 'function' ? cfg.portrait(gs) : cfg.portrait;
+  return key ? portraitHTML(key) : '';
+}
+
 function btn(id, handler) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('click', handler);
@@ -1506,6 +1768,7 @@ function renderEvent() {
     setStage(`
       <div class="${cardClass} event-card">
         <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
+        ${currentPortrait('pemberton')}
         ${eventBody}
         <hr class="sep">
         <p style="font-weight:700;margin-bottom:.5rem;">How do you handle Pemberton?</p>
@@ -1524,6 +1787,7 @@ function renderEvent() {
     setStage(`
       <div class="${cardClass} event-card">
         <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
+        ${currentPortrait('bigSal')}
         ${eventBody}
         <hr class="sep">
         <p style="font-weight:700;margin-bottom:.5rem;">What do you do with Big Sal's offer?</p>
@@ -1542,6 +1806,7 @@ function renderEvent() {
       setStage(`
         <div class="${cardClass} event-card">
           <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
+          ${currentPortrait('pemberton')}
           ${eventBody}
           <hr class="sep">
           <p style="font-weight:700;margin-bottom:.5rem;">The HOA ultimatum:</p>
@@ -1572,6 +1837,7 @@ function renderDay7Sub2() {
     setStage(`
       <div class="${cardClass} event-card">
         <span class="event-tag tag-mob">🕴️ The Reckoning</span>
+        ${portraitHTML('bigSal')}
         ${eventBody}
       </div>`);
     setTimeout(() => renderMobShowdown(), 2200);
@@ -1582,6 +1848,7 @@ function renderDay7Sub2() {
     setStage(`
       <div class="${cardClass} event-card">
         <span class="event-tag tag-mob">🕴️ Big Sal's Offer</span>
+        ${portraitHTML('bigSal')}
         ${eventBody}
         <hr class="sep">
         <div class="choices">${renderChoiceButtons(cfg.mobBuyoutChoices)}</div>
@@ -1655,6 +1922,7 @@ function renderMainEventAndChoices(cfg, cardClass, eventBody) {
   setStage(`
     <div class="${cardClass} event-card">
       <span class="event-tag ${cfg.eventTag}">${cfg.eventTagLabel}</span>
+      ${currentPortrait()}
       ${eventBody}
       <hr class="sep">
       <p style="font-weight:700;margin-bottom:.5rem;">What do you do?</p>
@@ -1818,6 +2086,7 @@ function renderMobShowdown() {
   setStage(`
     <div class="card event-card" style="border:2px solid #6644cc">
       <span class="event-tag tag-mob">🕴️ Big Sal's Ultimatum</span>
+      ${portraitHTML('bigSal')}
       <p class="narrative" style="font-weight:700">
         Big Sal stands in front of you, blocking the sun. Behind him, the three men
         wait with their arms crossed. Every customer who walks by gets the look.
